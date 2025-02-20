@@ -17,6 +17,11 @@ public class IPConfig {
     private IPConfig() {
     };
 
+    /**
+     * 
+     * @return num of ip port pairs loaded from config
+     * @throws IOException
+     */
     public static int num_sockets() throws IOException {
         if (socketInfos == null) {
             try {
@@ -29,7 +34,7 @@ public class IPConfig {
     }
 
     /**
-     * Get list of load ips and ports from the config file
+     * Loads from config ip port pairs to socketInfos
      * 
      * @throws IOException
      */
@@ -64,6 +69,12 @@ public class IPConfig {
         socketInfos = sockets.toArray(new SocketInfo[sockets.size()]);
     }
 
+    /**
+     * 
+     * @param index
+     * @return SocketInfo object with ip and port
+     * @throws IOException
+     */
     public static SocketInfo getNodeSocket(int index) throws IOException {
         if (socketInfos == null) {
             try {
@@ -87,10 +98,18 @@ public class IPConfig {
     }
 }
 
+/**
+ * SocketInfo class to store ip and port of nodes/clients/server
+ */
 class SocketInfo {
     private String ip;
     private int port;
 
+    /**
+     * 
+     * @param ip
+     * @param port
+     */
     public SocketInfo(String ip, int port) {
         this.ip = ip;
         this.port = port;
