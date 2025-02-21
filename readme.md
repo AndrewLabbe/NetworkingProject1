@@ -2,10 +2,45 @@
 
 ## Plan P2P
 
-- [ ] Create Node Class
-  - [ ] Send Updates
-  - [ ] Have a file structure
-- [ ] Connect multiple nodes
+p2pNode has code mockup test code to be server and client:
+
+### Node
+
+#### Listening
+
+More or less done, besides cleanup,
+
+Tell it what port to use open a socket on its own ip and that port (when opening it only needs to open localhost:defined_port)
+
+- Maybe use config file tell it what its own "index" in the file it is which can be useful
+  - One: when need to tell the node all the external ips it will be sending to
+  - Two: used for the nodeInfo ID and it can send that with its packet as well
+- For now prob want ports to stay defined in file for testing purposes, in the end we can just set all ports to the same in config as it wont make a difference in the code
+
+- give each node a home directory (If on separate machines we can just have a home/ directory they can all use, or make a cmd line arg to pass it the absolute path)
+
+#### Sending
+
+Rough code for a send message also defined in p2pNode:
+
+- define packet protocol
+- send packet: Guidelines - just file list, the existance of the packet is already a heartbeat
+
+#### Node info Storing
+
+- See NodeInfo, Guidelines - when was last update, file list, isAlive
+- Node ID:
+  - Option A: add a simple method to IPConfig that lets you send in ip and port and it tells u what index it is
+  - Option B: can also if we decide as above, each node knows its own id to send that as well
+
+#### Additional Guidelines
+
+- Node needs to check (Either in between on of the threads or on a new thread) how long since each notes heartbeat, and decide if one is dead or not
+- ...
+
+## Plan Client-Server
+
+Current goal is to focus on p2p first
 
 ## Project Goal
 

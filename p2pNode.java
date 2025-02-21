@@ -68,8 +68,12 @@ public class p2pNode {
     }
 
     public static void main(String[] args) throws SocketException {
-        int myPort = 9877;
-        int externalPort = 9876;
+        // int myPort = 9877;
+        // int externalPort = 9876;
+
+        int myPort = Integer.parseInt(args[0]);
+        int externalPort = Integer.parseInt(args[1]);
+
         p2pNode server;
         try {
             server = new p2pNode(myPort, externalPort);
