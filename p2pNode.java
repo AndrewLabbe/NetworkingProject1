@@ -9,12 +9,12 @@ import java.security.SecureRandom;
 
 public class p2pNode {
     DatagramSocket mySocket = null;
-    DatagramSocket listenSocket = null;
     SecureRandom random = new SecureRandom();
+    int externalPort;
 
     public p2pNode(int myPort, int externalPort) throws SocketException {
-        listenSocket = new DatagramSocket(externalPort);
         mySocket = new DatagramSocket(myPort);
+        this.externalPort = externalPort;
     }
 
     public void createAndListenSocket() {
@@ -24,7 +24,7 @@ public class p2pNode {
             while (true) {
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData,
                         incomingData.length);
-                listenSocket.receive(incomingPacket);
+                mySocket.receive(incomingPacket);
                 String message = new String(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
@@ -38,7 +38,7 @@ public class p2pNode {
 
                 DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
 
-                listenSocket.send(replyPacket);
+                mySocket.send(replyPacket);
                 Thread.sleep(2000);
             }
         } catch (SocketException e) {
@@ -55,7 +55,7 @@ public class p2pNode {
             InetAddress IPAddress = InetAddress.getByName(ipAddress);
             byte[] data = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port);
-            listenSocket.send(sendPacket);
+            mySocket.send(sendPacket);
             System.out.println("Message sent from client");
             // random time between 0 and 30000 ms (0 to 30 sec)
             // int wait = random.nextInt(0, 30001);
