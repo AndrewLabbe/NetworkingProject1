@@ -1,5 +1,18 @@
 # Networking Project 1
 
+run p2pNode.java main for testing
+
+will use hardcoded values unless given
+
+OPTIONAL ARGS
+
+```
+p2pNode.java <port to start on> <port to listen on>
+
+i.e.
+p2pNode.java 9001 9002
+```
+
 ## Plan P2P
 
 p2pNode has code mockup test code to be server and client:

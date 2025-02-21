@@ -68,11 +68,22 @@ public class p2pNode {
     }
 
     public static void main(String[] args) throws SocketException {
-        // int myPort = 9877;
-        // int externalPort = 9876;
-
-        int myPort = Integer.parseInt(args[0]);
-        int externalPort = Integer.parseInt(args[1]);
+        // for hard coded test values
+        int myPort;
+        int externalPort;
+        if (args.length > 0) {
+            try {
+                // optional command line args, (otherwise is hardcoded below)
+                myPort = Integer.parseInt(args[0]);
+                externalPort = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                System.out.println("args have been given, format myPort listenPort: Invalid args");
+                return;
+            }
+        } else {
+            myPort = 9877;
+            externalPort = 9876;
+        }
 
         p2pNode server;
         try {
