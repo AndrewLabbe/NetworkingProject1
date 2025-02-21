@@ -8,7 +8,7 @@ p2pNode has code mockup test code to be server and client:
 
 #### Listening
 
-More or less done, besides cleanup,
+Written out, need to make a real node class
 
 Tell it what port to use open a socket on its own ip and that port (when opening it only needs to open localhost:defined_port)
 
