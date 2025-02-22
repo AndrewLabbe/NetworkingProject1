@@ -1,11 +1,55 @@
 # Networking Project 1
 
+run p2pNode.java main for testing
+
+will use hardcoded values unless given
+
+OPTIONAL ARGS
+
+```
+p2pNode.java <port to start on> <port to listen on>
+
+i.e.
+p2pNode.java 9001 9002
+```
+
 ## Plan P2P
 
-- [ ] Create Node Class
-  - [ ] Send Updates
-  - [ ] Have a file structure
-- [ ] Connect multiple nodes
+p2pNode has code mockup test code to be server and client:
+
+### Node
+
+#### Listening
+
+Written out, need to make a real node class
+
+Tell it what port to use open a socket on its own ip and that port (when opening it only needs to open localhost:defined_port)
+
+[ ] Define real class
+[ ] Read all sockets from config file, send to all of those ports instead of just 1 defined one (excluding its own port
+  - Maybe use config file note what its own "index" (ie server1.ip to nodeID = 1) when excluding itself from its list of end node sockets is which can be sent with the packet to all nodes 
+  - For now prob want ports to stay defined in file for testing purposes, in the end we can just set all ports to the same in config as it wont make a difference in the code
+
+[ ] give each node a home directory (If on separate machines we can just have a home/ directory they can all use, or make a cmd line arg to pass it the absolute path)
+
+#### Sending
+
+Rough code for a send message also defined in p2pNode:
+
+[ ] define packet protocol
+[ ] send packet: Guidelines - just file list, the existance of the packet is already a heartbeat
+
+#### Node info Storing
+[ ] When recieve message from Node store data on the node
+- See NodeInfo, Guidelines - when was last update, file list, isAlive
+- Node ID:
+  - Option A: add a simple method to IPConfig that lets you send in ip and port and it tells u what index it is
+  - Option B: can also if we decide as above, each node knows its own id to send that as well
+[ ] Node needs to check (Either in between one of the two thread, sending or recieving or on a new thread) how long since each notes heartbeat, and decide if a node is dead or not
+
+## Plan Client-Server
+
+Current goal is to focus on p2p first
 
 ## Project Goal
 

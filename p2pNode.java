@@ -18,6 +18,7 @@ public class p2pNode {
 
     public p2pNode(int myPort) throws SocketException {
         mySocket = new DatagramSocket(myPort);
+        this.externalPort = externalPort;
     }
 
     public void createAndListenSocket() {
