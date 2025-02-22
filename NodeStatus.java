@@ -3,7 +3,7 @@ import java.util.List;
 
 import config.SocketInfo;
 
-public class NodeInfo {
+public class NodeStatus {
 
     public long lastHeartbeat;
     public List<String> fileList;
@@ -11,7 +11,7 @@ public class NodeInfo {
 
     public SocketInfo socketInfo;
 
-    public NodeInfo(String ip, int port) {
+    public NodeStatus(String ip, int port) {
         this.socketInfo = new SocketInfo(ip, port);
         this.lastHeartbeat = System.currentTimeMillis();
         this.fileList = new ArrayList<>();

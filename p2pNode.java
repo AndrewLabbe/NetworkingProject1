@@ -14,14 +14,16 @@ import config.SocketInfo;
 public class p2pNode {
     DatagramSocket selfDatagramSocket = null;
     SecureRandom random = new SecureRandom();
-    ArrayList<NodeInfo> connectedNodes = new ArrayList<NodeInfo>();
+    ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
     SocketInfo selfSocketInfo;
+    int nodeId = 0;
 
     public p2pNode(int myPort) throws Exception {
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
-
+        int bufferSize = selfDatagramSocket.getSendBufferSize();
+        System.out.println("Send Buffer Size: " + bufferSize);
         loadExternalNodes();
     }
 
@@ -31,10 +33,11 @@ public class p2pNode {
             // if the ip and port is itself, skip
             if (selfSocketInfo.isEqual(IPConfig.getNodeSocket(i))) {
                 System.out.println("Skipping self: " + i);
+                nodeId = i;
                 continue;
             }
             SocketInfo socket = IPConfig.getNodeSocket(i);
-            connectedNodes.add(new NodeInfo(socket.getIp(), socket.getPort()));
+            connectedNodes.add(new NodeStatus(socket.getIp(), socket.getPort()));
         }
     }
 
@@ -47,11 +50,18 @@ public class p2pNode {
                 // 0))
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 selfDatagramSocket.receive(incomingPacket);
-                String message = new String(incomingPacket.getData());
+
+                // String message = new String(incomingPacket.getData());
+                ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
+                if (packet == null) {
+                    System.out.println("is null");
+                    continue;
+                }
 
-                System.out.println("Received message from client: " + message);
+                System.out.println("Received message from client: " + packet.getSenderId());
+
                 System.out.println("Recieved IP:" + IPAddress.getHostAddress());
                 System.out.println("Recieved port:" + port);
 
@@ -72,35 +82,26 @@ public class p2pNode {
         }
     }
 
-    public ArrayList<String> returnFileDirectory() {
-        return null;
-    }
+    public void sendHeartbeatTo(NodeStatus info) {
+        String ip = info.socketInfo.getIp();
+        int port = info.socketInfo.getPort();
 
-    public void sendMessage(String message, String ipAddress, int port) {
         try {
-            InetAddress IPAddress = InetAddress.getByName(ipAddress);
-            byte[] data = message.getBytes();
-            DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port);
-            selfDatagramSocket.send(sendPacket);
-            System.out.println("Message sent from client");
-            // random time between 0 and 30000 ms (0 to 30 sec)
-            // send heartbeat
-            int wait = random.nextInt(0, 30001);
-            System.out.println("Waiting for " + wait + " ms");
-            Thread.sleep(wait);
+            DatagramPacket packet = ProtocolPacket.generateDatagramPacket(this.nodeId, getFileList(), ip, port);
+            // packet = new DatagramPacket("Hello".getBytes(), "Hello".getBytes().length,
+            // InetAddress.getByName(ip), port);
+            // System.out.println("size " + packet.getLength());
+            System.out.println("Sending heartbeat to " + ip + ":" + port);
+            selfDatagramSocket.send(packet);
+
+            Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void updateNode(int index){
-        NodeInfo info = connectedNodes.get(index);
-        // 
-    }
-
-    public void sendNodeInfo(NodeInfo info){
-        String iP = info.socketInfo.getIp();
-        int port = info.socketInfo.getPort();
+    private String[] getFileList() {
+        return new String[] { "1", "2", "3" };
     }
 
     public static String getSelfIP() throws Exception {
@@ -114,34 +115,26 @@ public class p2pNode {
         }
     }
 
-    public void heartbeat() {
-
-    }
-
-    public void openSendingThread(){
+    public void openSendingThread() {
         try {
-            while(true){
-                for(NodeInfo node : connectedNodes){
-                    
+            while (true) {
+                for (NodeStatus node : connectedNodes) {
+                    sendHeartbeatTo(node);
                 }
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
 
     public static void main(String[] args) throws Exception {
         int myPort = 9876;
-<<<<<<< Updated upstream
-=======
         // int myPort = 9877;
 
         if (args.length > 0) {
             myPort = Integer.parseInt(args[0]);
 
         }
->>>>>>> Stashed changes
         p2pNode server;
         try {
             server = new p2pNode(myPort);
@@ -156,12 +149,7 @@ public class p2pNode {
         };
         Thread sendThread = new Thread() {
             public void run() {
-                // while (true) {
-                //     server.sendMessage("Chris", "10.141.39.117", 9876);
-                //     server.sendMessage("Chris", "10.115.110.178", 9876);
-                // }
-
-                // Server.openSendingThread;
+                server.openSendingThread();
             }
         };
 
