@@ -2,9 +2,12 @@ import java.util.List;
 
 public class NodeInfo {
 
-    private int nodeId;
-    private long lastHeartbeat;
-    private List<String> fileList;
-    private boolean isAlive;
+    public int nodeId;
+    public long lastHeartbeat;
+    public List<String> fileList;
+    public boolean isAlive;
     
+    public NodeInfo(){
+        
+    }
 }
