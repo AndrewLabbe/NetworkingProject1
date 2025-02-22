@@ -17,7 +17,7 @@ p2pNode.java 9001 9002
 
 - get file list methods (send properly to nodes)
 - (get working serialization first) recieve packet and update node status for all connect nodes
-  - check/log if alive every x seconds, not which are not alive 
+  - check/log if alive every x seconds, not which are not alive (or if was dead and now alive again)
 - print results per guideline specifications
 
 After
