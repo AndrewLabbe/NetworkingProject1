@@ -19,4 +19,5 @@ public class NodeInfo {
         this.fileList = new ArrayList<>();
         this.isAlive = true;
     }
+
 }

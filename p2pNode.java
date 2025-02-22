@@ -28,8 +28,8 @@ public class p2pNode {
             System.out.println("Node: " + node.nodeId);
         }
     }
-  
-   private void loadExternalNodes() throws IOException {
+
+    private void loadExternalNodes() throws IOException {
         // load external nodes from file
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             // if the ip and port is itself, skip
@@ -42,19 +42,13 @@ public class p2pNode {
         }
     }
 
-    private void updateNodeHeartbeat(String ip, int port) {
-        for (NodeInfo node : connectedNodes) {
-            if (node.isSocket(ip, port)) {
-                node.lastHeartbeat = System.currentTimeMillis();
-            }
-        }
-    }
     public void createAndListenSocket() {
         try {
             byte[] incomingData = new byte[1024];
 
             while (true) {
-                //ProtocolPacket packet = new ProtocolPacket(new DatagramPacket(incomingData, 0))
+                // ProtocolPacket packet = new ProtocolPacket(new DatagramPacket(incomingData,
+                // 0))
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 selfDatagramSocket.receive(incomingPacket);
                 String message = new String(incomingPacket.getData());
@@ -82,7 +76,7 @@ public class p2pNode {
         }
     }
 
-    public ArrayList<String> returnFileDirectory(){
+    public ArrayList<String> returnFileDirectory() {
         return null;
     }
 
@@ -114,11 +108,11 @@ public class p2pNode {
         }
     }
 
-    public void heartbeat(){
+    public void heartbeat() {
 
     }
 
-    public static void main(String[] args) throws SocketException {
+    public static void main(String[] args) throws Exception {
         int myPort = 9876;
         p2pNode server;
         try {
