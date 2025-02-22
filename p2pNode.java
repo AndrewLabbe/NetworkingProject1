@@ -23,10 +23,6 @@ public class p2pNode {
         selfDatagramSocket = new DatagramSocket(myPort);
 
         loadExternalNodes();
-
-        for (NodeInfo node : connectedNodes) {
-            System.out.println("Node: " + node.nodeId);
-        }
     }
 
     private void loadExternalNodes() throws IOException {
@@ -38,7 +34,7 @@ public class p2pNode {
                 continue;
             }
             SocketInfo socket = IPConfig.getNodeSocket(i);
-            connectedNodes.add(new NodeInfo(i, socket.getIp(), socket.getPort()));
+            connectedNodes.add(new NodeInfo(socket.getIp(), socket.getPort()));
         }
     }
 
@@ -88,13 +84,23 @@ public class p2pNode {
             selfDatagramSocket.send(sendPacket);
             System.out.println("Message sent from client");
             // random time between 0 and 30000 ms (0 to 30 sec)
-            // int wait = random.nextInt(0, 30001);
-            int wait = 2000;
+            // send heartbeat
+            int wait = random.nextInt(0, 30001);
             System.out.println("Waiting for " + wait + " ms");
             Thread.sleep(wait);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateNode(int index){
+        NodeInfo info = connectedNodes.get(index);
+        // 
+    }
+
+    public void sendNodeInfo(NodeInfo info){
+        String iP = info.socketInfo.getIp();
+        int port = info.socketInfo.getPort();
     }
 
     public static String getSelfIP() throws Exception {
@@ -110,6 +116,19 @@ public class p2pNode {
 
     public void heartbeat() {
 
+    }
+
+    public void openSendingThread(){
+        try {
+            while(true){
+                for(NodeInfo node : connectedNodes){
+                    
+                }
+            }
+        }
+        catch (Exception e){
+            throw e;
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -128,10 +147,12 @@ public class p2pNode {
         };
         Thread sendThread = new Thread() {
             public void run() {
-                while (true) {
-                    server.sendMessage("Chris", "10.141.39.117", 9876);
-                    server.sendMessage("Chris", "10.115.110.178", 9876);
-                }
+                // while (true) {
+                //     server.sendMessage("Chris", "10.141.39.117", 9876);
+                //     server.sendMessage("Chris", "10.115.110.178", 9876);
+                // }
+
+                // Server.openSendingThread;
             }
         };
 

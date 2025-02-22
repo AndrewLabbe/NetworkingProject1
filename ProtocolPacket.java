@@ -27,4 +27,74 @@ public class ProtocolPacket {
         packet = new DatagramPacket(data, data.length);
     }
 
+    public static int getHeaderSize() {
+        return HEADER_SIZE;
+    }
+
+    public byte getVersion() {
+        return version;
+    }
+
+    public void setVersion(byte version) {
+        this.version = version;
+    }
+
+    public byte getType() {
+        return type;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public short getDataLength() {
+        return dataLength;
+    }
+
+    public void setDataLength(short dataLength) {
+        this.dataLength = dataLength;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public NodeInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(NodeInfo info) {
+        this.info = info;
+    }
+
+    public DatagramPacket getPacket() {
+        return packet;
+    }
+
+    public void setPacket(DatagramPacket packet) {
+        this.packet = packet;
+    }
+
+    
+
 }
