@@ -8,18 +8,47 @@ import java.net.SocketException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
+import config.IPConfig;
+import config.SocketInfo;
 
 public class p2pNode {
-
-    DatagramSocket mySocket = null;
+    DatagramSocket selfDatagramSocket = null;
     SecureRandom random = new SecureRandom();
-    
     ArrayList<NodeInfo> connectedNodes = new ArrayList<NodeInfo>();
 
-    public p2pNode(int myPort) throws SocketException {
-        mySocket = new DatagramSocket(myPort);
+    SocketInfo selfSocketInfo;
+
+    public p2pNode(int myPort) throws Exception {
+        selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
+        selfDatagramSocket = new DatagramSocket(myPort);
+
+        loadExternalNodes();
+
+        for (NodeInfo node : connectedNodes) {
+            System.out.println("Node: " + node.nodeId);
+        }
+    }
+  
+   private void loadExternalNodes() throws IOException {
+        // load external nodes from file
+        for (int i = 0; i < IPConfig.num_sockets(); i++) {
+            // if the ip and port is itself, skip
+            if (selfSocketInfo.isEqual(IPConfig.getNodeSocket(i))) {
+                System.out.println("Skipping self: " + i);
+                continue;
+            }
+            SocketInfo socket = IPConfig.getNodeSocket(i);
+            connectedNodes.add(new NodeInfo(i, socket.getIp(), socket.getPort()));
+        }
     }
 
+    private void updateNodeHeartbeat(String ip, int port) {
+        for (NodeInfo node : connectedNodes) {
+            if (node.isSocket(ip, port)) {
+                node.lastHeartbeat = System.currentTimeMillis();
+            }
+        }
+    }
     public void createAndListenSocket() {
         try {
             byte[] incomingData = new byte[1024];
@@ -27,7 +56,7 @@ public class p2pNode {
             while (true) {
                 //ProtocolPacket packet = new ProtocolPacket(new DatagramPacket(incomingData, 0))
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                mySocket.receive(incomingPacket);
+                selfDatagramSocket.receive(incomingPacket);
                 String message = new String(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
@@ -41,7 +70,7 @@ public class p2pNode {
 
                 DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
 
-                mySocket.send(replyPacket);
+                selfDatagramSocket.send(replyPacket);
                 Thread.sleep(2000);
             }
         } catch (SocketException e) {
@@ -62,7 +91,7 @@ public class p2pNode {
             InetAddress IPAddress = InetAddress.getByName(ipAddress);
             byte[] data = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port);
-            mySocket.send(sendPacket);
+            selfDatagramSocket.send(sendPacket);
             System.out.println("Message sent from client");
             // random time between 0 and 30000 ms (0 to 30 sec)
             // int wait = random.nextInt(0, 30001);
@@ -71,6 +100,17 @@ public class p2pNode {
             Thread.sleep(wait);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static String getSelfIP() throws Exception {
+        try (final DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            String ip = socket.getLocalAddress().getHostAddress();
+            System.out.println(ip);
+            return ip;
+        } catch (Exception e) {
+            throw e;
         }
     }
 
@@ -83,7 +123,7 @@ public class p2pNode {
         p2pNode server;
         try {
             server = new p2pNode(myPort);
-        } catch (SocketException e) {
+        } catch (Exception e) {
             throw e;
         }
 
@@ -95,7 +135,8 @@ public class p2pNode {
         Thread sendThread = new Thread() {
             public void run() {
                 while (true) {
-                    server.sendMessage("From Andrew", "10.115.135.251", myPort);
+                    server.sendMessage("Chris", "10.141.39.117", 9876);
+                    server.sendMessage("Chris", "10.115.110.178", 9876);
                 }
             }
         };

@@ -97,29 +97,3 @@ public class IPConfig {
         }
     }
 }
-
-/**
- * SocketInfo class to store ip and port of nodes/clients/server
- */
-class SocketInfo {
-    private String ip;
-    private int port;
-
-    /**
-     * 
-     * @param ip
-     * @param port
-     */
-    public SocketInfo(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-}
