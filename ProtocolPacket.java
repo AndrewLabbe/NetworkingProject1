@@ -2,6 +2,7 @@ import java.net.DatagramPacket;
 
 public class ProtocolPacket {
 
+<<<<<<< Updated upstream
     public static final int HEADER_SIZE = 16;
     private byte version;
     private byte type;
@@ -15,6 +16,18 @@ public class ProtocolPacket {
     public ProtocolPacket(byte version, byte type, int senderId, long timestamp, byte[] data, NodeInfo info) {
         this.version = version;
         this.type = type;
+=======
+    private byte version = 0;
+    private byte type = 0;
+    private int senderId = 0;
+    private long timestamp = 0;
+
+    private String[] fileNames = new String[] {};
+
+    private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
+        this.version = 1;
+        this.type = 1;
+>>>>>>> Stashed changes
         this.senderId = senderId;
         this.timestamp = timestamp;
         this.data = data;
@@ -25,10 +38,6 @@ public class ProtocolPacket {
 
     public void generatePacket(byte[] data){
         packet = new DatagramPacket(data, data.length);
-    }
-
-    public static int getHeaderSize() {
-        return HEADER_SIZE;
     }
 
     public byte getVersion() {
