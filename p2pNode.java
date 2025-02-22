@@ -22,7 +22,8 @@ public class p2pNode {
     public p2pNode(int myPort) throws Exception {
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
-
+        int bufferSize = selfDatagramSocket.getSendBufferSize();
+        System.out.println("Send Buffer Size: " + bufferSize);
         loadExternalNodes();
     }
 
@@ -54,8 +55,13 @@ public class p2pNode {
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
+                if (packet == null) {
+                    System.out.println("is null");
+                    continue;
+                }
 
                 System.out.println("Received message from client: " + packet.getSenderId());
+
                 System.out.println("Recieved IP:" + IPAddress.getHostAddress());
                 System.out.println("Recieved port:" + port);
 
@@ -82,7 +88,13 @@ public class p2pNode {
 
         try {
             DatagramPacket packet = ProtocolPacket.generateDatagramPacket(this.nodeId, getFileList(), ip, port);
+            // packet = new DatagramPacket("Hello".getBytes(), "Hello".getBytes().length,
+            // InetAddress.getByName(ip), port);
+            // System.out.println("size " + packet.getLength());
+            System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
+
+            Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,8 +128,8 @@ public class p2pNode {
     }
 
     public static void main(String[] args) throws Exception {
-        // int myPort = 9876;
-        int myPort = 9877;
+        int myPort = 9876;
+        // int myPort = 9877;
         p2pNode server;
         try {
             server = new p2pNode(myPort);

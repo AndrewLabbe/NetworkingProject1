@@ -11,12 +11,12 @@ import java.net.UnknownHostException;
 public class ProtocolPacket implements Serializable {
 
     public static final int HEADER_SIZE = 16;
-    private byte version;
-    private byte type;
-    private int senderId;
-    private long timestamp;
+    private byte version = 0;
+    private byte type = 0;
+    private int senderId = 0;
+    private long timestamp = 0;
 
-    private String[] fileNames;
+    private String[] fileNames = null;
 
     private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
         this.version = 1;
