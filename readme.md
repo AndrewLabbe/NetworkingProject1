@@ -12,8 +12,19 @@ p2pNode.java <port to start on> <port to listen on>
 i.e.
 p2pNode.java 9001 9002
 ```
+- **get protocol packet deserialization to work**
+  - Not desired but otherwise serialize by string
+
+- get file list methods (send properly to nodes)
+- (get working serialization first) recieve packet and update node status for all connect nodes
+  - check/log if alive every x seconds, not which are not alive 
+- print results per guideline specifications
+
+After
+- work on client-server
 
 ## Plan P2P
+
 
 p2pNode has code mockup test code to be server and client:
 
