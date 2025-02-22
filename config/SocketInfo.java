@@ -28,4 +28,5 @@ public class SocketInfo {
     public boolean isEqual(SocketInfo socketInfo) {
         return this.ip.equals(socketInfo.getIp()) && this.port == socketInfo.getPort();
     }
+
 }
