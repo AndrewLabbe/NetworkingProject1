@@ -10,9 +10,6 @@ public class NodeInfo {
     public List<String> fileList;
     public boolean isAlive;
 
-    // public String ip;
-    // public int port;
-
     public SocketInfo socketInfo;
 
     public NodeInfo(int nodeId, String ip, int port) {
@@ -22,9 +19,4 @@ public class NodeInfo {
         this.fileList = new ArrayList<>();
         this.isAlive = true;
     }
-
-    public boolean isSocket(String ip, int port) {
-        return this.socketInfo.getIp().equals(ip) && this.socketInfo.getPort() == port;
-    }
-
 }

@@ -14,7 +14,7 @@ import config.SocketInfo;
 public class p2pNode {
     DatagramSocket selfDatagramSocket = null;
     SecureRandom random = new SecureRandom();
-    ArrayList<NodeInfo> connectedNodes = new ArrayList();
+    ArrayList<NodeInfo> connectedNodes = new ArrayList<NodeInfo>();
 
     SocketInfo selfSocketInfo;
 
@@ -28,8 +28,8 @@ public class p2pNode {
             System.out.println("Node: " + node.nodeId);
         }
     }
-
-    private void loadExternalNodes() throws IOException {
+  
+   private void loadExternalNodes() throws IOException {
         // load external nodes from file
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             // if the ip and port is itself, skip
@@ -49,14 +49,13 @@ public class p2pNode {
             }
         }
     }
-
     public void createAndListenSocket() {
         try {
             byte[] incomingData = new byte[1024];
 
             while (true) {
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData,
-                        incomingData.length);
+                //ProtocolPacket packet = new ProtocolPacket(new DatagramPacket(incomingData, 0))
+                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 selfDatagramSocket.receive(incomingPacket);
                 String message = new String(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
@@ -81,6 +80,10 @@ public class p2pNode {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList<String> returnFileDirectory(){
+        return null;
     }
 
     public void sendMessage(String message, String ipAddress, int port) {
@@ -111,24 +114,12 @@ public class p2pNode {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        // for hard coded test values
-        int myPort;
-        int externalPort;
-        if (args.length > 0) {
-            try {
-                // optional command line args, (otherwise is hardcoded below)
-                myPort = Integer.parseInt(args[0]);
-                externalPort = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                System.out.println("args have been given, format myPort listenPort: Invalid args");
-                return;
-            }
-        } else {
-            myPort = 9876;
-            externalPort = 9876;
-        }
+    public void heartbeat(){
 
+    }
+
+    public static void main(String[] args) throws SocketException {
+        int myPort = 9876;
         p2pNode server;
         try {
             server = new p2pNode(myPort);
