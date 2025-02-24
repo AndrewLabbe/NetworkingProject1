@@ -25,8 +25,16 @@ public class SocketInfo {
         return port;
     }
 
-    public boolean isEqual(SocketInfo socketInfo) {
+    public boolean equals(SocketInfo socketInfo) {
+        System.out.println(socketInfo);
+        if (socketInfo.getIp().equals("localhost"))
+            return this.port == socketInfo.getPort();
         return this.ip.equals(socketInfo.getIp()) && this.port == socketInfo.getPort();
+    }
+
+    @Override
+    public String toString() {
+        return "SocketInfo [ip=" + ip + ", port=" + port + "]";
     }
 
 }

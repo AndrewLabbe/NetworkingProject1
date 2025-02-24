@@ -1,9 +1,11 @@
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -26,76 +28,63 @@ public class ProtocolPacket implements Serializable {
         this.fileNames = fileNames;
     }
 
-    private ProtocolPacket() {
+    private static byte[] serialize(final Object obj) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
+        try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            out.writeObject(obj);
+            out.flush();
+            return bos.toByteArray();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static ProtocolPacket deserializePacket(byte[] bytes)
+            throws ClassNotFoundException, IOException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+
+        ObjectInput in = new ObjectInputStream(bis);
+        return (ProtocolPacket) in.readObject();
     }
 
     public static DatagramPacket generateDatagramPacket(int id, String[] fileNames, String ip, int port)
-            throws UnknownHostException {
+            throws UnknownHostException, StreamCorruptedException {
         // serialize
         ProtocolPacket packet = new ProtocolPacket(id, System.currentTimeMillis(), fileNames);
-        byte[] data = packet.serializeToBytes();
+        byte[] data = ProtocolPacket.serialize(packet);
         return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
     }
 
-    // Method to serialize an object to a byte array
-    private byte[] serializeToBytes() {
-        byte[] byteArray = null;
-        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                ObjectOutputStream out = new ObjectOutputStream(byteOut)) {
-            out.writeObject(this);
-            byteArray = byteOut.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return byteArray;
-    }
-
-    public static ProtocolPacket deserializePacket(byte[] byteArray) {
-        ProtocolPacket protocolPacket = null;
-        try (ByteArrayInputStream byteIn = new ByteArrayInputStream(byteArray);
-                ObjectInputStream in = new ObjectInputStream(byteIn)) {
-            protocolPacket = (ProtocolPacket) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return protocolPacket;
-    }
-
-    public static int getHeaderSize() {
-        return HEADER_SIZE;
+    public static void main(String[] args) throws ClassNotFoundException, IOException {
+        DatagramPacket packet = ProtocolPacket.generateDatagramPacket(1, new String[] { "file1", "file2" }, "localhost",
+                1234);
+        ProtocolPacket obj = ProtocolPacket.deserializePacket(packet.getData());
+        System.out.println(obj.senderId);
     }
 
     public byte getVersion() {
         return version;
     }
 
-    public void setVersion(byte version) {
-        this.version = version;
-    }
-
     public byte getType() {
         return type;
-    }
-
-    public void setType(byte type) {
-        this.type = type;
     }
 
     public int getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
-    }
-
     public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public String[] getFileNames() {
+        return fileNames;
+    }
+
+    public void setFileNames(String[] fileNames) {
+        this.fileNames = fileNames;
     }
 
 }
