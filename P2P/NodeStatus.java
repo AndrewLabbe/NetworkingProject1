@@ -42,13 +42,14 @@ public class NodeStatus {
         this.fileList = packet.getFileNames();
     }
 
-
-    public void setLastHeartbeat(long time) {
-        this.lastHeartbeat = time;
-    }
-
-    public void setFileList(String[] fileList) {
+    /**
+     * 
+     * @param fileList : list of files namnes from node home dir
+     * @param time : time of the heartbeat recieved
+     */
+    public void updateStatus(String[] fileList, long time) {
         this.fileList = fileList;
+        this.lastHeartbeat = time;
     }
 
 
