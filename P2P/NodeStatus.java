@@ -36,7 +36,8 @@ public class NodeStatus {
      */
     public void updateStatus(String[] fileList, long time) {
         this.fileList = fileList;
-        this.lastHeartbeat = time;
+        if(this.lastHeartbeat < time)
+            this.lastHeartbeat = time;
     }
 
 

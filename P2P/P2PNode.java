@@ -4,6 +4,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,6 +40,7 @@ public class P2PNode {
      * Load external nodes to send heartbeats to from config file
      * @throws IOException
      */
+    // ToDo: config file needs to be at root to run using the play button, but should be in p2p folder when turned into jar
     private void loadExternalNodes() throws IOException {
         // load external nodes from file
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
@@ -72,9 +76,7 @@ public class P2PNode {
                 int port = incomingPacket.getPort();
                 System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
 
-
-                // ToDo: What should be our proper wait (is 2 seconds good or shorter?)
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);
@@ -136,12 +138,23 @@ public class P2PNode {
     /**
      * Prints the file lists of connnected nodes and is alive or dead
      */
-    public void printNodeStatus() {
+ public void printNodeStatus() {
         for (NodeStatus node : connectedNodes) {
             if(node.getNodeId() == nodeId) continue; // if is self continue
-            System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
-            System.out.println("Node " + node.getNodeId() + " last heartbeat: " + node.getLastHeartbeat());
-            System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+            // System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
+            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " + node.getLastHeartbeat());
+            // System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+
+            String isAlive = "offline";
+            if(node.checkAlive())
+                isAlive = "online";
+
+            LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()), ZoneId.systemDefault());
+            String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+            float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
+
+            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive, timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            System.out.println();
         }
     }
 
@@ -203,9 +216,9 @@ public class P2PNode {
             public void run() {
                 try {
                 while(true) {
+                // sleep for 15 seconds
+                Thread.sleep(5*1000);
                 server.printNodeStatus();
-                    // sleep for 15 seconds
-                    Thread.sleep(5*1000);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
