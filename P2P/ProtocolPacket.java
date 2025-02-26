@@ -13,11 +13,13 @@ import java.net.UnknownHostException;
 public class ProtocolPacket implements Serializable {
 
     public static final int HEADER_SIZE = 16;
-    private byte version = 0;
+    // Headers
+    private byte version = 1;
     private byte type = 0;
+    private long timestamp = 0; // automatically
     private int senderId = 0;
-    private long timestamp = 0;
 
+    // Body
     private String[] fileNames = null;
 
     private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
@@ -48,19 +50,22 @@ public class ProtocolPacket implements Serializable {
         return (ProtocolPacket) in.readObject();
     }
 
+    /**
+     * 
+     * @param id
+     * @param fileNames
+     * @param ip : where to send to
+     * @param port : where to send to
+     * @return
+     * @throws UnknownHostException
+     * @throws StreamCorruptedException
+     */
     public static DatagramPacket generateDatagramPacket(int id, String[] fileNames, String ip, int port)
             throws UnknownHostException, StreamCorruptedException {
         // serialize
         ProtocolPacket packet = new ProtocolPacket(id, System.currentTimeMillis(), fileNames);
         byte[] data = ProtocolPacket.serialize(packet);
         return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException, IOException {
-        DatagramPacket packet = ProtocolPacket.generateDatagramPacket(1, new String[] { "file1", "file2" }, "localhost",
-                1234);
-        ProtocolPacket obj = ProtocolPacket.deserializePacket(packet.getData());
-        System.out.println(obj.senderId);
     }
 
     public byte getVersion() {
