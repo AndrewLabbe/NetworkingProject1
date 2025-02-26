@@ -1,5 +1,7 @@
 //package Networking;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,12 +18,15 @@ public class p2pNode {
     SecureRandom random = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
+    String homeDirectory;
+
     SocketInfo selfSocketInfo;
     int nodeId = 0;
 
     public p2pNode(int myPort) throws Exception {
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
+        homeDirectory = "/Home/";
         int bufferSize = selfDatagramSocket.getSendBufferSize();
         System.out.println("Send Buffer Size: " + bufferSize);
         loadExternalNodes();
@@ -93,6 +98,7 @@ public class p2pNode {
             // System.out.println("size " + packet.getLength());
             System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
+            getFileList();
 
             Thread.sleep(3000);
         } catch (Exception e) {
@@ -100,8 +106,17 @@ public class p2pNode {
         }
     }
 
-    private String[] getFileList() {
-        return new String[] { "1", "2", "3" };
+    private static String[] getFileList() {
+        String directory = System.getProperty("user.dir");
+        File homeFolder = new File(directory + "/Home/");
+        File[] files = homeFolder.listFiles();
+        int numFiles = files.length;
+        String[] fileList = new String[numFiles];
+        for(int i = 0; i < numFiles; i++){
+            fileList[i] = files[i].getName();
+            System.out.println(fileList[i]);
+        }
+        return fileList;
     }
 
     public static String getSelfIP() throws Exception {
