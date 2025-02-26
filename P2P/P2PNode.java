@@ -1,24 +1,155 @@
-package P2P;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.security.SecureRandom;
+import java.util.ArrayList;
 
-public class P2PNode {
-    private String directory;
-    private String ip;
-    private String port;
+import config.IPConfig;
+import config.SocketInfo;
 
-    public P2PNode(String directory, String ip, String port) {
+public class p2pNode {
+    DatagramSocket selfDatagramSocket = null;
+    SecureRandom secureRandom = new SecureRandom();
+    ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
+    SocketInfo selfSocketInfo;
+    int nodeId = 0;
+
+    /**
+     * Constructor for p2pNode
+     * @param myPort : port number to listen on for incoming packets
+     * @throws Exception
+     */
+    public p2pNode(int myPort) throws Exception {
+        // 
+        selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
+        selfDatagramSocket = new DatagramSocket(myPort);
+
+        // Load connected nodes from config
+        loadExternalNodes();
     }
 
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
+    /**
+     * Load external nodes to send heartbeats to from config file
+     * @throws IOException
+     */
+    private void loadExternalNodes() throws IOException {
+        // load external nodes from file
+        for (int i = 0; i < IPConfig.num_sockets(); i++) {
+            // if the ip and port is itself, skip
+            if (selfSocketInfo.equals(IPConfig.getNodeSocket(i))) {
+                System.out.println("Skipping self: " + i);
+                nodeId = i;
+                continue;
+            }
+            SocketInfo socket = IPConfig.getNodeSocket(i);
+            connectedNodes.add(new NodeStatus(socket.getIp(), socket.getPort()));
+        }
     }
 
-    public void sendMessage() {
+    /**
+     * Listen for incoming packets, parse, and update info on connected nodes
+     */
+    public void createAndListenSocket() {
+        try {
+            byte[] incomingData = new byte[1024];
 
+            while (true) {
+                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                // accept packet
+                selfDatagramSocket.receive(incomingPacket);
+
+                // decode packet
+                ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                // ToDo: do we need?
+                if (packet == null) {
+                    System.out.println("is null");
+                    continue;
+                }
+                
+                // ToDo: Implement the logic to update based on recieved packet
+                InetAddress IPAddress = incomingPacket.getAddress();
+                int port = incomingPacket.getPort();
+                System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
+
+
+                // ToDo: What should be our proper wait (is 2 seconds good or shorter?)
+                Thread.sleep(2000);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Listening process was interupted", e);
+        }
     }
 
-    public void receiveMessage() {
+    /**
+     * Send a heartbeat to a specfic node, identified by the NodeStatus object
+     * @param info
+     */
+    public void sendHeartbeatTo(NodeStatus info) {
+        String ip = info.socketInfo.getIp();
+        int port = info.socketInfo.getPort();
 
+        try {
+            DatagramPacket packet = ProtocolPacket.generateDatagramPacket(this.nodeId, getFileList(), ip, port);
+            System.out.println("Sending heartbeat to " + ip + ":" + port);
+            selfDatagramSocket.send(packet);
+
+            Thread.sleep(3000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    // ToDo: Implement Real Logic
+    /**
+     * Get the list of files of node's home directory
+     * @return
+     */
+    private String[] getFileList() {
+        return new String[] { "f1", "f2", "f3" };
+    }
+
+    /**
+     * Get the IP address of the current machine
+     * @return
+     * @throws Exception
+     */
+    public static String getSelfIP() throws Exception {
+        try (final DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            String ip = socket.getLocalAddress().getHostAddress();
+            System.out.println(ip);
+            return ip;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Prints the file lists of connnected nodes and is alive or dead
+     */
+    public void printNodeStatus() {
+        // ToDo: Implement printing node status per documentation
+        // ToDo: The implementation of tracking if node is alive can be built directly into the NodeStatus Class as checking isAlive thru a method can programmatically check if the node is alive based on timeout
+    }
+
+    /**
+     * Runs a loop to send heartbeats to all connected nodes every 0-30 seconds (randomized each time)
+          * @throws Exception 
+          */
+    public void createHeartbeatProcess() {
+        try {
+            while (true) {
+                // Send heartbeat to each node
+                for (NodeStatus node : connectedNodes) sendHeartbeatTo(node);
+                // ToDo: Randomize send time (0-30 seconds)
+                long sleepTime = 2000;
+                // long sleepTime = secureRandom.nextInt(30001);
+                Thread.sleep(sleepTime);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("heartbeat proccess was interupted", e);
+        }
+    }
 }

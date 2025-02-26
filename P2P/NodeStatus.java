@@ -1,0 +1,62 @@
+import config.SocketInfo;
+
+public class NodeStatus {
+    // ToDo: May be good to implement timeout static var (ms)
+    public static long TIMEOUT = 30000;
+
+    public int nodeId;
+    public long lastHeartbeat;
+    public String[] fileList;
+    public boolean isAlive;
+
+    public SocketInfo socketInfo;
+
+    public NodeStatus(String ip, int port) {
+        this.socketInfo = new SocketInfo(ip, port);
+        this.lastHeartbeat = System.currentTimeMillis();
+        this.fileList = new String[0];
+        this.isAlive = true;
+    }
+
+    /**
+     * Update the status of a node based on the heartbeat packet
+     * (Update the last heartbeat time and the file list of the node)
+     * Set alive to true
+     * @param packet
+     * @throws Exception
+     */
+    public void updateStatus(ProtocolPacket packet) throws Exception {
+        if(packet.getSenderId() != this.nodeId) {
+            throw new Exception("Packet sender id does not match node id");
+        }
+
+        
+        // (if was not alive and now is do we need to do anything?)
+        // if(!isAlive) {
+            //     System.out.println("Node " + nodeId + " is back online");
+            // }
+            
+            
+        isAlive = true;
+        this.lastHeartbeat = packet.getTimestamp();
+        this.fileList = packet.getFileNames();
+    }
+
+
+    public void setLastHeartbeat(long time) {
+        this.lastHeartbeat = time;
+    }
+
+    public void setFileList(String[] fileList) {
+        this.fileList = fileList;
+    }
+
+
+    /**
+     * Check if node has sent a heartbeat within the last 30 seconds
+     * @return
+     */
+    public boolean checkAlive() {
+        return System.currentTimeMillis() - lastHeartbeat < 30000;
+    }
+}
