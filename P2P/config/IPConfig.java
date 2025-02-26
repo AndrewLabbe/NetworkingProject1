@@ -35,7 +35,7 @@ public class IPConfig {
 
     /**
      * Loads from config ip port pairs to socketInfos
-     * 
+     *
      * @throws IOException
      */
     private static void loadSockets() throws IOException {
@@ -48,7 +48,7 @@ public class IPConfig {
         } catch (IOException e) {
             throw new IOException("Failed to load config file" + e.getMessage());
         }
-        int index = 1;
+        int index = 0;
         ArrayList<SocketInfo> sockets = new ArrayList<>();
         System.out.println("Loading sockets");
         do {

@@ -5,11 +5,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import config.IPConfig;
 import config.SocketInfo;
 
-public class p2pNode {
+public class P2PNode {
     DatagramSocket selfDatagramSocket = null;
     SecureRandom secureRandom = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
@@ -22,7 +23,7 @@ public class p2pNode {
      * @param myPort : port number to listen on for incoming packets
      * @throws Exception
      */
-    public p2pNode(int myPort) throws Exception {
+    public P2PNode(int myPort) throws Exception {
         //
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
@@ -41,12 +42,11 @@ public class p2pNode {
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             // if the ip and port is itself, skip
             if (selfSocketInfo.equals(IPConfig.getNodeSocket(i))) {
-                System.out.println("Skipping self: " + i);
+                System.out.println("Setting id: " + i);
                 nodeId = i;
-                continue;
             }
             SocketInfo socket = IPConfig.getNodeSocket(i);
-            connectedNodes.add(new NodeStatus(socket.getIp(), socket.getPort()));
+            connectedNodes.add(new NodeStatus(i, socket.getIp(), socket.getPort()));
         }
     }
 
@@ -64,13 +64,10 @@ public class p2pNode {
 
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
-                // ToDo: do we need?
-                if (packet == null) {
-                    System.out.println("is null");
-                    continue;
-                }
-                
-                // ToDo: Implement the logic to update based on recieved packet
+
+                // update node status
+                connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(), packet.getTimestamp());
+
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
                 System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
@@ -103,7 +100,6 @@ public class p2pNode {
         }
     }
 
-    // ToDo: Implement Real Logic
     /**
      * Get the list of files of node's home directory
      * @return
@@ -111,14 +107,13 @@ public class p2pNode {
 
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
-        System.out.println(directory);
         File homeFolder = new File(directory + "/Home/");
         File[] files = homeFolder.listFiles();
         int numFiles = files.length;
         String[] fileList = new String[numFiles];
         for(int i = 0; i < numFiles; i++){
             fileList[i] = files[i].getName();
-            System.out.println(fileList[i]);
+            // System.out.println(fileList[i]);
         }
         return fileList;
     }
@@ -142,9 +137,11 @@ public class p2pNode {
      * Prints the file lists of connnected nodes and is alive or dead
      */
     public void printNodeStatus() {
-        // ToDo: Implement printing node status per documentation
-        // ToDo: The implementation of tracking if node is alive can be built directly into the NodeStatus Class as checking isAlive thru a method can programmatically check if the node is alive based on timeout
-
+        for (NodeStatus node : connectedNodes) {
+            if(node.getNodeId() == nodeId) continue; // if is self continue
+            System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
+            System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+        }
     }
 
     /**
@@ -155,7 +152,10 @@ public class p2pNode {
         try {
             while (true) {
                 // Send heartbeat to each node
-                for (NodeStatus node : connectedNodes) sendHeartbeatTo(node);
+                for (NodeStatus node : connectedNodes) {
+                    if(node.getNodeId() == nodeId) continue; // if is self continue
+                    sendHeartbeatTo(node);
+                }
                 // ToDo: Randomize send time (0-30 seconds)
                 long sleepTime = 2000;
                 // long sleepTime = secureRandom.nextInt(30001);
@@ -177,9 +177,9 @@ public class p2pNode {
             System.out.println(myPort);
         }
         // int myPort = 9877;
-        p2pNode server;
+        P2PNode server;
         try {
-            server = new p2pNode(myPort);
+            server = new P2PNode(myPort);
         } catch (Exception e) {
             throw e;
         }
@@ -204,7 +204,7 @@ public class p2pNode {
                 while(true) {
                 server.printNodeStatus();
                     // sleep for 15 seconds
-                    Thread.sleep(15*1000);
+                    Thread.sleep(5*1000);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
