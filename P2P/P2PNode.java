@@ -7,6 +7,10 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 import config.IPConfig;
 import config.SocketInfo;
 
@@ -139,14 +143,23 @@ public class P2PNode {
     public void printNodeStatus() {
         for (NodeStatus node : connectedNodes) {
             if(node.getNodeId() == nodeId) continue; // if is self continue
-            System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
-            System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+            // System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
+            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " + node.getLastHeartbeat());
+            // System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+
+            String isAlive = "offline";
+            if(node.checkAlive())
+                isAlive = "online";
+
+            LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()), ZoneId.systemDefault());
+
+            System.out.printf("Node: %d is %s, last heartbeat %s and has files: %s\n", node.getNodeId(), isAlive, dateTime, Arrays.toString(node.getFileList()));
         }
     }
 
     /**
      * Runs a loop to send heartbeats to all connected nodes every 0-30 seconds (randomized each time)
-          * @throws Exception 
+          * @throws Exception
           */
     public void createHeartbeatProcess() {
         try {
@@ -202,9 +215,10 @@ public class P2PNode {
             public void run() {
                 try {
                 while(true) {
+                    Thread.sleep(5*1000);
                 server.printNodeStatus();
                     // sleep for 15 seconds
-                    Thread.sleep(5*1000);
+                    
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
