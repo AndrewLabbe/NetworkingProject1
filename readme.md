@@ -12,8 +12,18 @@ p2pNode.java <port to start on> <port to listen on>
 i.e.
 p2pNode.java 9001 9002
 ```
+- ~~get protocol packet deserialization to work~~
+
+- get file list methods (send properly to nodes)
+- (get working serialization first) recieve packet and update node status for all connect nodes
+  - check/log if alive every x seconds, not which are not alive (or if was dead and now alive again)
+- print results per guideline specifications
+
+After
+- work on client-server
 
 ## Plan P2P
+
 
 p2pNode has code mockup test code to be server and client:
 
@@ -25,10 +35,9 @@ Written out, need to make a real node class
 
 Tell it what port to use open a socket on its own ip and that port (when opening it only needs to open localhost:defined_port)
 
-[ ] Define real class
-[ ] Read all sockets from config file, send to all of those ports instead of just 1 defined one (excluding its own port
-  - Maybe use config file note what its own "index" (ie server1.ip to nodeID = 1) when excluding itself from its list of end node sockets is which can be sent with the packet to all nodes 
-  - For now prob want ports to stay defined in file for testing purposes, in the end we can just set all ports to the same in config as it wont make a difference in the code
+~~Define real class~~
+~~Read all sockets from config file, send to all of those ports instead of just 1 defined one (excluding its own port~~
+~~Maybe use config file note what its own "index" (ie server1.ip to nodeID = 1) when excluding itself from its list of end node sockets is which can be sent with the packet to all nodes~~
 
 [ ] give each node a home directory (If on separate machines we can just have a home/ directory they can all use, or make a cmd line arg to pass it the absolute path)
 
@@ -36,8 +45,8 @@ Tell it what port to use open a socket on its own ip and that port (when opening
 
 Rough code for a send message also defined in p2pNode:
 
-[ ] define packet protocol
-[ ] send packet: Guidelines - just file list, the existance of the packet is already a heartbeat
+~~define packet protocol~~
+~~send packet: Guidelines - just file list, the existance of the packet is already a heartbeat~~
 
 #### Node info Storing
 [ ] When recieve message from Node store data on the node
