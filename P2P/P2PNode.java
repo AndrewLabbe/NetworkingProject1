@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -25,6 +26,7 @@ public class p2pNode {
         //
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
+
 
         // Load connected nodes from config
         loadExternalNodes();
@@ -106,10 +108,20 @@ public class p2pNode {
      * Get the list of files of node's home directory
      * @return
      */
-    private String[] getFileList() {
-        return new String[] { "f1", "f2", "f3" };
-    }
 
+    private static String[] getFileList() {
+        String directory = System.getProperty("user.dir");
+        System.out.println(directory);
+        File homeFolder = new File(directory + "/Home/");
+        File[] files = homeFolder.listFiles();
+        int numFiles = files.length;
+        String[] fileList = new String[numFiles];
+        for(int i = 0; i < numFiles; i++){
+            fileList[i] = files[i].getName();
+            System.out.println(fileList[i]);
+        }
+        return fileList;
+    }
     /**
      * Get the IP address of the current machine
      * @return
@@ -132,6 +144,7 @@ public class p2pNode {
     public void printNodeStatus() {
         // ToDo: Implement printing node status per documentation
         // ToDo: The implementation of tracking if node is alive can be built directly into the NodeStatus Class as checking isAlive thru a method can programmatically check if the node is alive based on timeout
+
     }
 
     /**
@@ -185,16 +198,31 @@ public class p2pNode {
             }
         };
 
-        // ToDo: Implement thread for updating the node status (Said in class ~15 seconds)
+        Thread updateThread = new Thread() {
+            public void run() {
+                try {
+                while(true) {
+                server.printNodeStatus();
+                    // sleep for 15 seconds
+                    Thread.sleep(15*1000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        };
+
 
         // start the threads
         readThread.start();
         sendThread.start();
+        updateThread.start();
 
         // wait for the threads to finish
         try {
             readThread.join();
             sendThread.join();
+            updateThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -7,7 +7,6 @@ public class NodeStatus {
     public int nodeId;
     public long lastHeartbeat;
     public String[] fileList;
-    public boolean isAlive;
 
     public SocketInfo socketInfo;
 
@@ -15,7 +14,6 @@ public class NodeStatus {
         this.socketInfo = new SocketInfo(ip, port);
         this.lastHeartbeat = System.currentTimeMillis();
         this.fileList = new String[0];
-        this.isAlive = true;
     }
 
     /**
@@ -30,14 +28,7 @@ public class NodeStatus {
             throw new Exception("Packet sender id does not match node id");
         }
 
-        
-        // (if was not alive and now is do we need to do anything?)
-        // if(!isAlive) {
-            //     System.out.println("Node " + nodeId + " is back online");
-            // }
-            
-            
-        isAlive = true;
+
         this.lastHeartbeat = packet.getTimestamp();
         this.fileList = packet.getFileNames();
     }
