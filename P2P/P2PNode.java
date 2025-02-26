@@ -95,8 +95,6 @@ public class P2PNode {
             DatagramPacket packet = ProtocolPacket.generateDatagramPacket(this.nodeId, getFileList(), ip, port);
             System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
-
-            Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -170,9 +168,8 @@ public class P2PNode {
                     if(node.getNodeId() == nodeId) continue; // if is self continue
                     sendHeartbeatTo(node);
                 }
-                // ToDo: Randomize send time (0-30 seconds)
-                long sleepTime = 2000;
-                // long sleepTime = secureRandom.nextInt(30001);
+                // long sleepTime = 2000;
+                long sleepTime = secureRandom.nextInt(30001);
                 Thread.sleep(sleepTime);
             }
         } catch (Exception e) {
