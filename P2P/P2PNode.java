@@ -140,6 +140,7 @@ public class P2PNode {
         for (NodeStatus node : connectedNodes) {
             if(node.getNodeId() == nodeId) continue; // if is self continue
             System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
+            System.out.println("Node " + node.getNodeId() + " last heartbeat: " + node.getLastHeartbeat());
             System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
         }
     }
