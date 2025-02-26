@@ -1,5 +1,7 @@
 //package Networking;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -14,6 +16,8 @@ public class p2pNode {
     DatagramSocket selfDatagramSocket = null;
     SecureRandom random = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
+
+    String homeDirectory;
 
     SocketInfo selfSocketInfo;
     int nodeId = 0;
@@ -83,6 +87,7 @@ public class p2pNode {
             // System.out.println("size " + packet.getLength());
             System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
+            getFileList();
 
             Thread.sleep(3000);
         } catch (Exception e) {
@@ -91,7 +96,7 @@ public class p2pNode {
     }
 
     private String[] getFileList() {
-        return new String[] { "f1", "f2", "f3" };
+        return new String[] { "1", "2", "3" };
     }
 
     public static String getSelfIP() throws Exception {
