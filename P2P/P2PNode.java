@@ -23,6 +23,7 @@ public class P2PNode {
 
     /**
      * Constructor for p2pNode
+     *
      * @param myPort : port number to listen on for incoming packets
      * @throws Exception
      */
@@ -31,16 +32,17 @@ public class P2PNode {
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
 
-
         // Load connected nodes from config
         loadExternalNodes();
     }
 
     /**
      * Load external nodes to send heartbeats to from config file
+     *
      * @throws IOException
      */
-    // ToDo: config file needs to be at root to run using the play button, but should be in p2p folder when turned into jar
+    // ToDo: config file needs to be at root to run using the play button, but
+    // should be in p2p folder when turned into jar
     private void loadExternalNodes() throws IOException {
         // load external nodes from file
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
@@ -50,7 +52,11 @@ public class P2PNode {
                 nodeId = i;
             }
             SocketInfo socket = IPConfig.getNodeSocket(i);
-            connectedNodes.add(new NodeStatus(i, socket.getIp(), socket.getPort()));
+            NodeStatus status = new NodeStatus(i, socket.getIp(), socket.getPort());
+            // ToDo: If node just started, status for all other nodes should not be online
+            // (below code prints arbitrary seconbds b4update)
+            status.setLastHeartbeat(System.currentTimeMillis() - 10000 * 60);
+            connectedNodes.add(status);
         }
     }
 
@@ -70,7 +76,14 @@ public class P2PNode {
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
                 // update node status
-                connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(), packet.getTimestamp());
+                // connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(),
+                // packet.getTimestamp());
+
+                System.out.println(packet.getType());
+                if (packet.getType() == 0) { // check that it is a client packet
+                    NodeStatus node = packet.getNode(0);
+                    connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
+                }
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
@@ -85,6 +98,7 @@ public class P2PNode {
 
     /**
      * Send a heartbeat to a specfic node, identified by the NodeStatus object
+     *
      * @param info
      */
     public void sendHeartbeatTo(NodeStatus info) {
@@ -92,7 +106,9 @@ public class P2PNode {
         int port = info.socketInfo.getPort();
 
         try {
-            DatagramPacket packet = ProtocolPacket.generateDatagramPacket(this.nodeId, getFileList(), ip, port);
+            DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
+                    new NodeStatus(this.nodeId, getFileList(), ip, port),
+                    ip, port);
             System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
         } catch (Exception e) {
@@ -102,6 +118,7 @@ public class P2PNode {
 
     /**
      * Get the list of files of node's home directory
+     * 
      * @return
      */
 
@@ -111,14 +128,16 @@ public class P2PNode {
         File[] files = homeFolder.listFiles();
         int numFiles = files.length;
         String[] fileList = new String[numFiles];
-        for(int i = 0; i < numFiles; i++){
+        for (int i = 0; i < numFiles; i++) {
             fileList[i] = files[i].getName();
             // System.out.println(fileList[i]);
         }
         return fileList;
     }
+
     /**
      * Get the IP address of the current machine
+     * 
      * @return
      * @throws Exception
      */
@@ -136,36 +155,45 @@ public class P2PNode {
     /**
      * Prints the file lists of connnected nodes and is alive or dead
      */
- public void printNodeStatus() {
+    public void printNodeStatus() {
         for (NodeStatus node : connectedNodes) {
-            if(node.getNodeId() == nodeId) continue; // if is self continue
-            // System.out.println("Node " + node.getNodeId() + " is alive: " + node.checkAlive());
-            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " + node.getLastHeartbeat());
-            // System.out.println("Node " + node.getNodeId() + " has files: " + Arrays.toString(node.getFileList()));
+            if (node.getNodeId() == nodeId)
+                continue; // if is self continue
+            // System.out.println("Node " + node.getNodeId() + " is alive: " +
+            // node.checkAlive());
+            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " +
+            // node.getLastHeartbeat());
+            // System.out.println("Node " + node.getNodeId() + " has files: " +
+            // Arrays.toString(node.getFileList()));
 
             String isAlive = "offline";
-            if(node.checkAlive())
+            if (node.checkAlive())
                 isAlive = "online";
 
-            LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()), ZoneId.systemDefault());
+            LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
+                    ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive, timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
+                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
             System.out.println();
         }
     }
 
     /**
-     * Runs a loop to send heartbeats to all connected nodes every 0-30 seconds (randomized each time)
-          * @throws Exception 
-          */
+     * Runs a loop to send heartbeats to all connected nodes every 0-30 seconds
+     * (randomized each time)
+     * 
+     * @throws Exception
+     */
     public void createHeartbeatProcess() {
         try {
             while (true) {
                 // Send heartbeat to each node
                 for (NodeStatus node : connectedNodes) {
-                    if(node.getNodeId() == nodeId) continue; // if is self continue
+                    if (node.getNodeId() == nodeId)
+                        continue; // if is self continue
                     sendHeartbeatTo(node);
                 }
                 // long sleepTime = 2000;
@@ -176,7 +204,6 @@ public class P2PNode {
             throw new RuntimeException("heartbeat proccess was interupted", e);
         }
     }
-
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting P2P Node on port 9876");
@@ -212,17 +239,16 @@ public class P2PNode {
         Thread updateThread = new Thread() {
             public void run() {
                 try {
-                while(true) {
-                // sleep for 15 seconds
-                Thread.sleep(5*1000);
-                server.printNodeStatus();
+                    while (true) {
+                        // sleep for 15 seconds
+                        Thread.sleep(5 * 1000);
+                        server.printNodeStatus();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }
         };
-
 
         // start the threads
         readThread.start();
