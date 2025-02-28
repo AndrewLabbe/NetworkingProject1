@@ -9,25 +9,29 @@ import java.io.StreamCorruptedException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class ProtocolPacket implements Serializable {
 
     public static final int HEADER_SIZE = 16;
     // Headers
     private byte version = 1;
+    // 0 = client 1 = server
     private byte type = 0;
-    private long timestamp = 0; // automatically
-    private int senderId = 0;
+    private long sentTimestamp = 0; // automatically
 
     // Body
-    private String[] fileNames = null;
+    // private String[] fileNames = null;
+    private ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
-    private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
+    // private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
+    private ProtocolPacket(ArrayList<NodeStatus> connectedNodes, byte type) {
         this.version = 1;
-        this.type = 1;
-        this.senderId = senderId;
-        this.timestamp = timestamp;
-        this.fileNames = fileNames;
+        this.type = type;
+        this.connectedNodes = connectedNodes;
+        // this.fileNames = fileNames;
+        // this.senderId = senderId;
+        // this.timestamp = timestamp;
     }
 
     private static byte[] serialize(final Object obj) {
@@ -54,16 +58,25 @@ public class ProtocolPacket implements Serializable {
      * 
      * @param id
      * @param fileNames
-     * @param ip : where to send to
-     * @param port : where to send to
+     * @param ip        : where to send to
+     * @param port      : where to send to
      * @return
      * @throws UnknownHostException
      * @throws StreamCorruptedException
      */
-    public static DatagramPacket generateDatagramPacket(int id, String[] fileNames, String ip, int port)
+
+    public static DatagramPacket generateClientDatagramPacket(NodeStatus node, String ip, int port)
             throws UnknownHostException, StreamCorruptedException {
-        // serialize
-        ProtocolPacket packet = new ProtocolPacket(id, System.currentTimeMillis(), fileNames);
+        ArrayList<NodeStatus> list = new ArrayList<>();
+        list.add(node);
+        ProtocolPacket packet = new ProtocolPacket(list, (byte) 0);
+        byte[] data = ProtocolPacket.serialize(packet);
+        return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
+    }
+
+    public static DatagramPacket generateServerDatagramPacket(ArrayList<NodeStatus> nodes, String ip, int port)
+            throws UnknownHostException, StreamCorruptedException {
+        ProtocolPacket packet = new ProtocolPacket(nodes, (byte) 1);
         byte[] data = ProtocolPacket.serialize(packet);
         return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
     }
@@ -76,20 +89,16 @@ public class ProtocolPacket implements Serializable {
         return type;
     }
 
-    public int getSenderId() {
-        return senderId;
-    }
-
     public long getTimestamp() {
-        return timestamp;
+        return sentTimestamp;
     }
 
-    public String[] getFileNames() {
-        return fileNames;
+    public ArrayList<NodeStatus> getConnectedNodes() {
+        return connectedNodes;
     }
 
-    public void setFileNames(String[] fileNames) {
-        this.fileNames = fileNames;
+    public NodeStatus getNode(int index) {
+        return connectedNodes.get(index);
     }
 
 }
