@@ -1,9 +1,11 @@
 package config;
 
+import java.io.Serializable;
+
 /**
  * SocketInfo class to store ip and port of nodes/clients/server
  */
-public class SocketInfo {
+public class SocketInfo implements Serializable{
     private String ip;
     private int port;
 
