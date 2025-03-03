@@ -79,7 +79,7 @@ public class IPConfig {
      * @return SocketInfo object with ip and port
      * @throws IOException
      */
-    public static SocketInfo getclientsocket(int index) throws IOException {
+    public static SocketInfo getClientSocket(int index) throws IOException {
         if (clientSocketInfos == null) {
             try {
                 loadSockets();
@@ -101,17 +101,17 @@ public class IPConfig {
         return serverSocketInfo;
     }
 
-    public static void main(String[] args) {
-        System.out.println("Testing IPConfig...");
-        try {
-            System.out.println(
-                    "Server: " + IPConfig.getServerSocket().getIp() + ":" + IPConfig.getServerSocket().getPort());
-            for (int i = 0; i < IPConfig.num_sockets(); i++) {
-                System.out.println("Client" + i + ": " + IPConfig.getclientsocket(i).getIp() + ":"
-                        + IPConfig.getclientsocket(i).getPort());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // public static void main(String[] args) {
+    //     System.out.println("Testing IPConfig...");
+    //     try {
+    //         System.out.println(
+    //                 "Server: " + IPConfig.getServerSocket().getIp() + ":" + IPConfig.getServerSocket().getPort());
+    //         for (int i = 0; i < IPConfig.num_sockets(); i++) {
+    //             System.out.println("Client" + i + ": " + IPConfig.getclientsocket(i).getIp() + ":"
+    //                     + IPConfig.getclientsocket(i).getPort());
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 }

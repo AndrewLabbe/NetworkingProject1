@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,7 +18,6 @@ public class ServerNode {
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
     SocketInfo selfSocketInfo;
-    int nodeId = 0;
 
     /**
      * Constructor for p2pNode
@@ -33,7 +31,7 @@ public class ServerNode {
         selfDatagramSocket = new DatagramSocket(myPort);
 
         // Load connected nodes from config
-        loadExternalNodes();
+        loadClients();
     }
 
     /**
@@ -43,15 +41,10 @@ public class ServerNode {
      */
     // ToDo: config file needs to be at root to run using the play button, but
     // should be in p2p folder when turned into jar
-    private void loadExternalNodes() throws IOException {
+    private void loadClients() throws IOException {
         // load external nodes from file
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
-            // if the ip and port is itself, skip
-            if (selfSocketInfo.equals(IPConfig.getNodeSocket(i))) {
-                System.out.println("Setting id: " + i);
-                nodeId = i;
-            }
-            SocketInfo socket = IPConfig.getNodeSocket(i);
+            SocketInfo socket = IPConfig.getClientSocket(i);
             NodeStatus status = new NodeStatus(i, socket.getIp(), socket.getPort());
             // ToDo: If node just started, status for all other nodes should not be online
             // (below code prints arbitrary seconbds b4update)
@@ -75,11 +68,7 @@ public class ServerNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                // update node status
-                // connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(),
-                // packet.getTimestamp());
-
-                System.out.println(packet.getType());
+                // System.out.println(packet.getType());
                 if (packet.getType() == 0) { // check that it is a client packet
                     NodeStatus node = packet.getNode(0);
                     connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
@@ -101,38 +90,19 @@ public class ServerNode {
      *
      * @param info
      */
-    public void sendHeartbeatTo(NodeStatus info) {
-        String ip = info.socketInfo.getIp();
-        int port = info.socketInfo.getPort();
+    public void sendClientInfo() {
+        for(NodeStatus node : connectedNodes){
+            String ip = node.socketInfo.getIp();
+            int port = node.socketInfo.getPort();
 
-        try {
-            DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
-                    new NodeStatus(this.nodeId, getFileList(), ip, port),
-                    ip, port);
-            System.out.println("Sending heartbeat to " + ip + ":" + port);
-            selfDatagramSocket.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
+                System.out.println("Sending node info to " + ip + ":" + port);
+                selfDatagramSocket.send(packet);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-    }
-
-    /**
-     * Get the list of files of node's home directory
-     * 
-     * @return
-     */
-
-    private static String[] getFileList() {
-        String directory = System.getProperty("user.dir");
-        File homeFolder = new File(directory + "/Home/");
-        File[] files = homeFolder.listFiles();
-        int numFiles = files.length;
-        String[] fileList = new String[numFiles];
-        for (int i = 0; i < numFiles; i++) {
-            fileList[i] = files[i].getName();
-            // System.out.println(fileList[i]);
-        }
-        return fileList;
     }
 
     /**
@@ -157,15 +127,6 @@ public class ServerNode {
      */
     public void printNodeStatus() {
         for (NodeStatus node : connectedNodes) {
-            if (node.getNodeId() == nodeId)
-                continue; // if is self continue
-            // System.out.println("Node " + node.getNodeId() + " is alive: " +
-            // node.checkAlive());
-            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " +
-            // node.getLastHeartbeat());
-            // System.out.println("Node " + node.getNodeId() + " has files: " +
-            // Arrays.toString(node.getFileList()));
-
             String isAlive = "offline";
             if (node.checkAlive())
                 isAlive = "online";
@@ -190,14 +151,10 @@ public class ServerNode {
     public void createHeartbeatProcess() {
         try {
             while (true) {
-                // Send heartbeat to each node
-                for (NodeStatus node : connectedNodes) {
-                    if (node.getNodeId() == nodeId)
-                        continue; // if is self continue
-                    sendHeartbeatTo(node);
-                }
-                // long sleepTime = 2000;
-                long sleepTime = secureRandom.nextInt(30001);
+                // Send node info to each client
+                sendClientInfo();
+                long sleepTime = 2000;
+                // long sleepTime = secureRandom.nextInt(30001);
                 Thread.sleep(sleepTime);
             }
         } catch (Exception e) {
@@ -206,8 +163,10 @@ public class ServerNode {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting P2P Node on port 9876");
-        int myPort = 9876;
+        System.out.println("Starting Server on port 9876");
+
+        // TODO update to pull value from clientserver.properties 
+        int myPort = 9879;
 
         // optional: specify port number as argument
         if (args.length > 0) {
@@ -215,9 +174,9 @@ public class ServerNode {
             System.out.println(myPort);
         }
         // int myPort = 9877;
-        P2PNode server;
+        ServerNode server;
         try {
-            server = new P2PNode(myPort);
+            server = new ServerNode(myPort);
         } catch (Exception e) {
             throw e;
         }
