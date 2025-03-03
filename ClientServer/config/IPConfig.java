@@ -79,7 +79,7 @@ public class IPConfig {
      * @return SocketInfo object with ip and port
      * @throws IOException
      */
-    public static SocketInfo getClientSocket(int index) throws IOException {
+    public static SocketInfo getclientsocket(int index) throws IOException {
         if (clientSocketInfos == null) {
             try {
                 loadSockets();
@@ -91,14 +91,14 @@ public class IPConfig {
     }
 
     public static SocketInfo getServerSocket() throws IOException {
-        if (clientSocketInfos == null) {
+        if (serverSocketInfo == null) {
             try {
                 loadSockets();
             } catch (IOException e) {
                 throw e;
             }
         }
-        return clientSocketInfos[0];
+        return serverSocketInfo;
     }
 
     public static void main(String[] args) {
@@ -107,8 +107,8 @@ public class IPConfig {
             System.out.println(
                     "Server: " + IPConfig.getServerSocket().getIp() + ":" + IPConfig.getServerSocket().getPort());
             for (int i = 0; i < IPConfig.num_sockets(); i++) {
-                System.out.println("Client" + i + ": " + IPConfig.getClientSocket(i).getIp() + ":"
-                        + IPConfig.getClientSocket(i).getPort());
+                System.out.println("Client" + i + ": " + IPConfig.getclientsocket(i).getIp() + ":"
+                        + IPConfig.getclientsocket(i).getPort());
             }
         } catch (Exception e) {
             e.printStackTrace();
