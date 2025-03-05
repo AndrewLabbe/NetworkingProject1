@@ -72,7 +72,7 @@ public class ClientNode {
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
-                System.out.println("Received client info from " + IPAddress.getHostAddress() + ":" + port);
+                // System.out.println("Received client info from " + IPAddress.getHostAddress() + ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -94,7 +94,7 @@ public class ClientNode {
             DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
                     new NodeStatus(this.nodeId, getFileList(), ip, port),
                     ip, port);
-            System.out.println("Sending heartbeat to " + ip + ":" + port);
+            // System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,7 +145,12 @@ public class ClientNode {
      * Prints the file lists of connnected nodes and is alive or dead
      */
     public void printNodeStatus() {
+        System.out.println("----------------------");
         System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+        if(connectedNodes.size() == 0){
+            System.out.println("No node status received from server yet.");
+            return;
+        }
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
@@ -177,7 +182,6 @@ public class ClientNode {
                 node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
-        System.out.println("----------------------");
     }
 
     /**
