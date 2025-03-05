@@ -74,7 +74,7 @@ public class ServerNode {
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
-                System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
+                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -95,7 +95,7 @@ public class ServerNode {
 
             try {
                 DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
-                System.out.println("Sending node info to " + ip + ":" + port);
+                // System.out.println("Sending node info to " + ip + ":" + port);
                 selfDatagramSocket.send(packet);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -124,6 +124,8 @@ public class ServerNode {
      * Prints the file lists of connnected nodes and is alive or dead
      */
     public void printNodeStatus() {
+        System.out.println("----------------------");
+        System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
         for (NodeStatus node : connectedNodes) {
             String isAlive = "offline";
             if (!node.hasUpdated) {
