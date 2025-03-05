@@ -74,7 +74,8 @@ public class ServerNode {
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
-                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
+                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() +
+                // ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -125,7 +126,8 @@ public class ServerNode {
      */
     public void printNodeStatus() {
         System.out.println("----------------------");
-        System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+        System.out.println("Node status as of: "
+                + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
         for (NodeStatus node : connectedNodes) {
             String isAlive = "offline";
             if (!node.hasUpdated) {
@@ -142,15 +144,15 @@ public class ServerNode {
 
             String fileList;
 
-            if(node.getFileList() == null){
+            if (node.getFileList() == null) {
                 fileList = "Home folder not found";
-            }
-            else{
+            } else {
                 fileList = Arrays.toString(node.getFileList());
             }
 
-            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
-                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
+                    node.socketInfo.getIp(),
+                    node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
@@ -176,16 +178,17 @@ public class ServerNode {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting Server on port 9876");
-
-        // TODO update to pull value from clientserver.properties
         int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {
             myPort = Integer.parseInt(args[0]);
             System.out.println(myPort);
+        } else {
+            System.out.println("No port specified, using default port 9876");
+            System.out.println("(Ex: java -jar P2PNode.jar 9876)");
         }
+        System.out.println("Starting P2PNode on port " + myPort);
         // int myPort = 9877;
         ServerNode server;
         try {

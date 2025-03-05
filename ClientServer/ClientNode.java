@@ -1,10 +1,7 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -72,7 +69,8 @@ public class ClientNode {
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
-                // System.out.println("Received client info from " + IPAddress.getHostAddress() + ":" + port);
+                // System.out.println("Received client info from " + IPAddress.getHostAddress()
+                // + ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -110,7 +108,7 @@ public class ClientNode {
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
-        if(!homeFolder.exists()){
+        if (!homeFolder.exists()) {
             return null;
         }
         File[] files = homeFolder.listFiles();
@@ -121,7 +119,7 @@ public class ClientNode {
             // System.out.println(fileList[i]);
         }
         return fileList;
-        
+
     }
 
     /**
@@ -146,8 +144,9 @@ public class ClientNode {
      */
     public void printNodeStatus() {
         System.out.println("----------------------");
-        System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
-        if(connectedNodes.size() == 0){
+        System.out.println("Node status as of: "
+                + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+        if (connectedNodes.size() == 0) {
             System.out.println("No node status received from server yet.");
             return;
         }
@@ -171,15 +170,15 @@ public class ClientNode {
 
             String fileList;
 
-            if(node.getFileList() == null){
+            if (node.getFileList() == null) {
                 fileList = "Home folder not found";
-            }
-            else{
+            } else {
                 fileList = Arrays.toString(node.getFileList());
             }
 
-            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
-                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
+                    node.socketInfo.getIp(),
+                    node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
@@ -205,14 +204,17 @@ public class ClientNode {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting P2P Node on port 9876");
         int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {
             myPort = Integer.parseInt(args[0]);
             System.out.println(myPort);
+        } else {
+            System.out.println("No port specified, using default port 9876");
+            System.out.println("(Ex: java -jar P2PNode.jar 9876)");
         }
+        System.out.println("Starting P2PNode on port " + myPort);
         // int myPort = 9877;
         ClientNode client;
         try {
