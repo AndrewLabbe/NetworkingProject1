@@ -119,7 +119,7 @@ public class ClientNode {
 
     /**
      * Get the IP address of the current machine
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -142,6 +142,11 @@ public class ClientNode {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
 
+            if (!node.hasUpdated) {
+                System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
+                System.out.println();
+                continue;
+            }
             String isAlive = "offline";
             if (node.checkAlive())
                 isAlive = "online";
