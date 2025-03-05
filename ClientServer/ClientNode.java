@@ -37,7 +37,7 @@ public class ClientNode {
 
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             SocketInfo socket = IPConfig.getClientSocket(i);
-            if(selfSocketInfo.equals(socket)){
+            if (selfSocketInfo.equals(socket)) {
                 nodeId = i;
                 break;
             }
@@ -64,7 +64,7 @@ public class ClientNode {
                 // packet.getTimestamp());
 
                 // System.out.println(packet.getType());
-                if (packet.getType() == 1)  // check that it is a server packet
+                if (packet.getType() == 1) // check that it is a server packet
                     connectedNodes = packet.getConnectedNodes();
 
                 InetAddress IPAddress = incomingPacket.getAddress();
@@ -179,7 +179,7 @@ public class ClientNode {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting P2P Node on port 9876");
-        int myPort = 9872;
+        int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {
