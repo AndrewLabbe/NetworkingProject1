@@ -1,0 +1,5 @@
+# make sure your in the ClientServer Directory
+
+javac **/**.java
+jar cfe ServerNode.jar ServerNode -C . .
+jar cfe ClientNode.jar ClientNode -C . .
