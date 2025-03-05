@@ -10,10 +10,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
 import config.IPConfig;
 import config.SocketInfo;
 
@@ -89,7 +85,8 @@ public class P2PNode {
 
                 InetAddress IPAddress = incomingPacket.getAddress();
                 int port = incomingPacket.getPort();
-                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() + ":" + port);
+                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() +
+                // ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -127,7 +124,7 @@ public class P2PNode {
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
-        if(!homeFolder.exists()){
+        if (!homeFolder.exists()) {
             return null;
         }
         File[] files = homeFolder.listFiles();
@@ -162,7 +159,8 @@ public class P2PNode {
      */
     public void printNodeStatus() {
         System.out.println("----------------------");
-        System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+        System.out.println("Node status as of: "
+                + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
@@ -184,15 +182,15 @@ public class P2PNode {
 
             String fileList;
 
-            if(node.getFileList() == null){
+            if (node.getFileList() == null) {
                 fileList = "Home folder not found";
-            }
-            else{
+            } else {
                 fileList = Arrays.toString(node.getFileList());
             }
 
-            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
-                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
+                    node.socketInfo.getIp(),
+                    node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
@@ -222,14 +220,17 @@ public class P2PNode {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting P2P Node on port 9876");
         int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {
             myPort = Integer.parseInt(args[0]);
             System.out.println(myPort);
+        } else {
+            System.out.println("No port specified, using default port 9876");
+            System.out.println("(Ex: java -jar P2PNode.jar 9876)");
         }
+        System.out.println("Starting P2PNode on port " + myPort);
         // int myPort = 9877;
         P2PNode server;
         try {
@@ -255,15 +256,15 @@ public class P2PNode {
         Thread updateThread = new Thread() {
             public void run() {
                 try {
-                while(true) {
-                // sleep for 15 seconds
-                Thread.sleep(5*1000);
-                server.printNodeStatus();
+                    while (true) {
+                        // sleep for 15 seconds
+                        Thread.sleep(5 * 1000);
+                        server.printNodeStatus();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }
         };
 
         // start the threads
