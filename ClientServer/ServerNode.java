@@ -166,7 +166,7 @@ public class ServerNode {
         System.out.println("Starting Server on port 9876");
 
         // TODO update to pull value from clientserver.properties 
-        int myPort = 9879;
+        int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {
