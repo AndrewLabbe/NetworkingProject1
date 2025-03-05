@@ -1,7 +1,10 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,7 +40,7 @@ public class ClientNode {
 
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             SocketInfo socket = IPConfig.getClientSocket(i);
-            if(selfSocketInfo.equals(socket)){
+            if (selfSocketInfo.equals(socket)) {
                 nodeId = i;
                 break;
             }
@@ -64,7 +67,7 @@ public class ClientNode {
                 // packet.getTimestamp());
 
                 // System.out.println(packet.getType());
-                if (packet.getType() == 1)  // check that it is a server packet
+                if (packet.getType() == 1) // check that it is a server packet
                     connectedNodes = packet.getConnectedNodes();
 
                 InetAddress IPAddress = incomingPacket.getAddress();
@@ -107,6 +110,9 @@ public class ClientNode {
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
+        if(!homeFolder.exists()){
+            return null;
+        }
         File[] files = homeFolder.listFiles();
         int numFiles = files.length;
         String[] fileList = new String[numFiles];
@@ -115,11 +121,12 @@ public class ClientNode {
             // System.out.println(fileList[i]);
         }
         return fileList;
+        
     }
 
     /**
      * Get the IP address of the current machine
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -138,10 +145,16 @@ public class ClientNode {
      * Prints the file lists of connnected nodes and is alive or dead
      */
     public void printNodeStatus() {
+        System.out.println("Node status as of: " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
 
+            if (!node.hasUpdated) {
+                System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
+                System.out.println();
+                continue;
+            }
             String isAlive = "offline";
             if (node.checkAlive())
                 isAlive = "online";
@@ -151,10 +164,20 @@ public class ClientNode {
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
-                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            String fileList;
+
+            if(node.getFileList() == null){
+                fileList = "Home folder not found";
+            }
+            else{
+                fileList = Arrays.toString(node.getFileList());
+            }
+
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
+                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
+        System.out.println("----------------------");
     }
 
     /**
@@ -179,7 +202,7 @@ public class ClientNode {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting P2P Node on port 9876");
-        int myPort = 9872;
+        int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {

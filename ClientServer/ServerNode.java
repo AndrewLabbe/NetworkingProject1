@@ -46,9 +46,7 @@ public class ServerNode {
         for (int i = 0; i < IPConfig.num_sockets(); i++) {
             SocketInfo socket = IPConfig.getClientSocket(i);
             NodeStatus status = new NodeStatus(i, socket.getIp(), socket.getPort());
-            // ToDo: If node just started, status for all other nodes should not be online
-            // (below code prints arbitrary seconbds b4update)
-            status.setLastHeartbeat(System.currentTimeMillis() - 10000 * 60);
+            status.setHasUpdated(false);
             connectedNodes.add(status);
         }
     }
@@ -91,7 +89,7 @@ public class ServerNode {
      * @param info
      */
     public void sendClientInfo() {
-        for(NodeStatus node : connectedNodes){
+        for (NodeStatus node : connectedNodes) {
             String ip = node.socketInfo.getIp();
             int port = node.socketInfo.getPort();
 
@@ -128,16 +126,29 @@ public class ServerNode {
     public void printNodeStatus() {
         for (NodeStatus node : connectedNodes) {
             String isAlive = "offline";
+            if (!node.hasUpdated) {
+                System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
+                System.out.println();
+                continue;
+            }
             if (node.checkAlive())
                 isAlive = "online";
-
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
                     ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
-                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            String fileList;
+
+            if(node.getFileList() == null){
+                fileList = "Home folder not found";
+            }
+            else{
+                fileList = Arrays.toString(node.getFileList());
+            }
+
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
+                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
@@ -165,8 +176,8 @@ public class ServerNode {
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Server on port 9876");
 
-        // TODO update to pull value from clientserver.properties 
-        int myPort = 9879;
+        // TODO update to pull value from clientserver.properties
+        int myPort = 9876;
 
         // optional: specify port number as argument
         if (args.length > 0) {

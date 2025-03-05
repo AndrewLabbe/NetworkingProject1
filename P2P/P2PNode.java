@@ -45,7 +45,6 @@ public class P2PNode {
      *
      * @throws IOException
      */
-    // ToDo: config file needs to be at root to run using the play button, but
     // should be in p2p folder when turned into jar
     private void loadExternalNodes() throws IOException {
         // load external nodes from file
@@ -57,9 +56,9 @@ public class P2PNode {
             }
             SocketInfo socket = IPConfig.getNodeSocket(i);
             NodeStatus status = new NodeStatus(i, socket.getIp(), socket.getPort());
-            // ToDo: If node just started, status for all other nodes should not be online
+
             // (below code prints arbitrary seconbds b4update)
-            status.setLastHeartbeat(System.currentTimeMillis() - 10000 * 60);
+            status.setHasUpdated(false);
             connectedNodes.add(status);
         }
     }
@@ -83,7 +82,6 @@ public class P2PNode {
                 // connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(),
                 // packet.getTimestamp());
 
-                System.out.println(packet.getType());
                 if (packet.getType() == 0) { // check that it is a client packet
                     NodeStatus node = packet.getNode(0);
                     connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
@@ -129,6 +127,9 @@ public class P2PNode {
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
+        if(!homeFolder.exists()){
+            return null;
+        }
         File[] files = homeFolder.listFiles();
         int numFiles = files.length;
         String[] fileList = new String[numFiles];
@@ -163,12 +164,12 @@ public class P2PNode {
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
-            // System.out.println("Node " + node.getNodeId() + " is alive: " +
-            // node.checkAlive());
-            // System.out.println("Node " + node.getNodeId() + " last heartbeat: " +
-            // node.getLastHeartbeat());
-            // System.out.println("Node " + node.getNodeId() + " has files: " +
-            // Arrays.toString(node.getFileList()));
+
+            if (!node.isHasUpdated()) {
+                System.out.printf("Node %d: has not recieved a heartbeat yet", node.getNodeId());
+                System.out.println();
+                continue;
+            }
 
             String isAlive = "offline";
             if (node.checkAlive())
@@ -179,8 +180,17 @@ public class P2PNode {
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
-                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            String fileList;
+
+            if(node.getFileList() == null){
+                fileList = "Home folder not found";
+            }
+            else{
+                fileList = Arrays.toString(node.getFileList());
+            }
+
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
+                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
