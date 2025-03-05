@@ -10,6 +10,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 import config.IPConfig;
 import config.SocketInfo;
 
@@ -123,6 +127,9 @@ public class P2PNode {
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
+        if(!homeFolder.exists()){
+            return null;
+        }
         File[] files = homeFolder.listFiles();
         int numFiles = files.length;
         String[] fileList = new String[numFiles];
@@ -173,8 +180,17 @@ public class P2PNode {
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
-                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            String fileList;
+
+            if(node.getFileList() == null){
+                fileList = "Home folder not found";
+            }
+            else{
+                fileList = Arrays.toString(node.getFileList());
+            }
+
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
+                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
@@ -237,15 +253,15 @@ public class P2PNode {
         Thread updateThread = new Thread() {
             public void run() {
                 try {
-                    while (true) {
-                        // sleep for 15 seconds
-                        Thread.sleep(5 * 1000);
-                        server.printNodeStatus();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                while(true) {
+                // sleep for 15 seconds
+                Thread.sleep(5*1000);
+                server.printNodeStatus();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+        }
         };
 
         // start the threads

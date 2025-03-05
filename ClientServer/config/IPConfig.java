@@ -8,11 +8,10 @@ import java.util.Properties;
 
 public class IPConfig {
 
-    private static File configFile = new File("clientserver.properties");
+    private static File configFile = new File("config.properties");
     private static Properties config = null;
 
-    private static SocketInfo[] clientSocketInfos = null;
-    private static SocketInfo serverSocketInfo = null;
+    private static SocketInfo[] socketInfos = null;
 
     // "static class" equiv, prevents instantiation
     private IPConfig() {
@@ -24,14 +23,14 @@ public class IPConfig {
      * @throws IOException
      */
     public static int num_sockets() throws IOException {
-        if (clientSocketInfos == null) {
+        if (socketInfos == null) {
             try {
                 loadSockets();
             } catch (IOException e) {
                 throw e;
             }
         }
-        return clientSocketInfos.length;
+        return socketInfos.length;
     }
 
     /**
@@ -39,7 +38,6 @@ public class IPConfig {
      *
      * @throws IOException
      */
-    // ToDo : support for server vs client
     private static void loadSockets() throws IOException {
         if (config != null)
             return;
@@ -47,8 +45,6 @@ public class IPConfig {
             config = new Properties();
             FileInputStream propsInput = new FileInputStream(configFile);
             config.load(propsInput);
-            serverSocketInfo = new SocketInfo(config.getProperty("server.ip"),
-                    Integer.parseInt(config.getProperty("server.port")));
         } catch (IOException e) {
             throw new IOException("Failed to load config file" + e.getMessage());
         }
@@ -57,9 +53,9 @@ public class IPConfig {
         System.out.println("Loading sockets");
         do {
             try {
-                String clientKey = "client" + index + ".";
-                sockets.add(new SocketInfo(config.getProperty(clientKey + "ip"),
-                        Integer.parseInt(config.getProperty(clientKey + "port"))));
+                String serverKey = "server" + index + ".";
+                sockets.add(new SocketInfo(config.getProperty(serverKey + "ip"),
+                        Integer.parseInt(config.getProperty(serverKey + "port"))));
                 index++;
                 // when error, there is no more sockets in config
             } catch (Exception e) {
@@ -70,7 +66,7 @@ public class IPConfig {
         if (sockets.size() == 0) {
             throw new IOException("No sockets found in config file");
         }
-        clientSocketInfos = sockets.toArray(new SocketInfo[sockets.size()]);
+        socketInfos = sockets.toArray(new SocketInfo[sockets.size()]);
     }
 
     /**
@@ -79,39 +75,25 @@ public class IPConfig {
      * @return SocketInfo object with ip and port
      * @throws IOException
      */
-    public static SocketInfo getClientSocket(int index) throws IOException {
-        if (clientSocketInfos == null) {
+    public static SocketInfo getNodeSocket(int index) throws IOException {
+        if (socketInfos == null) {
             try {
                 loadSockets();
             } catch (IOException e) {
                 throw e;
             }
         }
-        return clientSocketInfos[index];
+        return socketInfos[index];
     }
 
-    public static SocketInfo getServerSocket() throws IOException {
-        if (serverSocketInfo == null) {
-            try {
-                loadSockets();
-            } catch (IOException e) {
-                throw e;
+    public static void main(String[] args) {
+        System.out.println("Testing IPConfig...");
+        try {
+            for (int i = 0; i < IPConfig.num_sockets(); i++) {
+                System.out.println(IPConfig.getNodeSocket(i).getIp() + ":" + IPConfig.getNodeSocket(i).getPort());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return serverSocketInfo;
     }
-
-    // public static void main(String[] args) {
-    //     System.out.println("Testing IPConfig...");
-    //     try {
-    //         System.out.println(
-    //                 "Server: " + IPConfig.getServerSocket().getIp() + ":" + IPConfig.getServerSocket().getPort());
-    //         for (int i = 0; i < IPConfig.num_sockets(); i++) {
-    //             System.out.println("Client" + i + ": " + IPConfig.getclientsocket(i).getIp() + ":"
-    //                     + IPConfig.getclientsocket(i).getPort());
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    // }
 }

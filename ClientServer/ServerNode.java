@@ -138,8 +138,17 @@ public class ServerNode {
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
             float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
 
-            System.out.printf("Node %d: is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), isAlive,
-                    timeStamp, timeSince, Arrays.toString(node.getFileList()));
+            String fileList;
+
+            if(node.getFileList() == null){
+                fileList = "Home folder not found";
+            }
+            else{
+                fileList = Arrays.toString(node.getFileList());
+            }
+
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(), node.socketInfo.getIp(), 
+                node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
         }
     }
