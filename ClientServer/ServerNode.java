@@ -13,6 +13,7 @@ import config.IPConfig;
 import config.SocketInfo;
 
 public class ServerNode {
+    // Fields to store self info regarding socket, random interval of time for heartbeat sending and list of connected nodes in the network
     DatagramSocket selfDatagramSocket = null;
     SecureRandom secureRandom = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
@@ -26,7 +27,7 @@ public class ServerNode {
      * @throws Exception
      */
     public ServerNode(int myPort) throws Exception {
-        //
+        // Populating self socket info (IP/Port) and creating DatagramSocket for connection purposes
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
 
@@ -59,6 +60,7 @@ public class ServerNode {
             byte[] incomingData = new byte[1024];
 
             while (true) {
+                // create datagram packet using incoming data as paramater
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 // accept packet
                 selfDatagramSocket.receive(incomingPacket);
@@ -66,16 +68,11 @@ public class ServerNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                // System.out.println(packet.getType());
-                if (packet.getType() == 0) { // check that it is a client packet
+                // check that it is a client packet
+                if (packet.getType() == 0) { 
                     NodeStatus node = packet.getNode(0);
                     connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
                 }
-
-                InetAddress IPAddress = incomingPacket.getAddress();
-                int port = incomingPacket.getPort();
-                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() +
-                // ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -91,12 +88,13 @@ public class ServerNode {
      */
     public void sendClientInfo() {
         for (NodeStatus node : connectedNodes) {
+            // Pulling self IP/Port
             String ip = node.socketInfo.getIp();
             int port = node.socketInfo.getPort();
 
+            // Forming the packet with respective info/data to be sent to clients
             try {
                 DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
-                // System.out.println("Sending node info to " + ip + ":" + port);
                 selfDatagramSocket.send(packet);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -128,6 +126,9 @@ public class ServerNode {
         System.out.println("----------------------");
         System.out.println("Node status as of: "
                 + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+
+        // Iterate though all connectedNode list to print out respective node status(s)
+        // Used to print out node information regarding if alive, last heartbeat sent and file listing(s)
         for (NodeStatus node : connectedNodes) {
             String isAlive = "offline";
             if (!node.hasUpdated) {
@@ -144,12 +145,14 @@ public class ServerNode {
 
             String fileList;
 
+            // If home folder/directory does not currently exist
             if (node.getFileList() == null) {
                 fileList = "Home folder not found";
             } else {
                 fileList = Arrays.toString(node.getFileList());
             }
 
+            // Actual print statement
             System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
                     node.socketInfo.getIp(),
                     node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
@@ -211,6 +214,7 @@ public class ServerNode {
             }
         };
 
+        // Refresh terminal every 20 seconds to update node status(s)
         Thread updateThread = new Thread() {
             public void run() {
                 try {

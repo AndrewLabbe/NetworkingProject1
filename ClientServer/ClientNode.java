@@ -13,10 +13,12 @@ import config.IPConfig;
 import config.SocketInfo;
 
 public class ClientNode {
+    // Fields to store self info regarding socket, random interval of time for heartbeat sending and list of connected nodes in the network
     DatagramSocket selfDatagramSocket = null;
     SecureRandom secureRandom = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
+    // Contains socket information regarding server and self, alongside nodeId
     SocketInfo serverSocketInfo;
     SocketInfo selfSocketInfo;
     int nodeId = 0;
@@ -59,18 +61,8 @@ public class ClientNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                // update node status
-                // connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(),
-                // packet.getTimestamp());
-
-                // System.out.println(packet.getType());
                 if (packet.getType() == 1) // check that it is a server packet
                     connectedNodes = packet.getConnectedNodes();
-
-                InetAddress IPAddress = incomingPacket.getAddress();
-                int port = incomingPacket.getPort();
-                // System.out.println("Received client info from " + IPAddress.getHostAddress()
-                // + ":" + port);
 
                 Thread.sleep(1000);
             }
@@ -81,13 +73,12 @@ public class ClientNode {
 
     /**
      * Send a heartbeat to a specfic node, identified by the NodeStatus object
-     *
-     * @param info
      */
     public void sendHeartbeat() {
         String ip = serverSocketInfo.getIp();
         int port = serverSocketInfo.getPort();
 
+        // Create datagram packet using the filelist of itself, alongside its nodeId
         try {
             DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
                     new NodeStatus(this.nodeId, getFileList(), ip, port),
@@ -102,12 +93,13 @@ public class ClientNode {
     /**
      * Get the list of files of node's home directory
      * 
-     * @return
+     * @return fileList
      */
-
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
+
+        // If does not exist, return null for computation purposes in printing node status
         if (!homeFolder.exists()) {
             return null;
         }
@@ -146,14 +138,19 @@ public class ClientNode {
         System.out.println("----------------------");
         System.out.println("Node status as of: "
                 + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+        
+        // Case if no nodes currently connected on the network
         if (connectedNodes.size() == 0) {
             System.out.println("No node status received from server yet.");
             return;
         }
+
+        // Iterate though each node connected to print status and other related information
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
 
+            // Node has not yet sent heartbeat
             if (!node.hasUpdated) {
                 System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
                 System.out.println();
@@ -163,6 +160,7 @@ public class ClientNode {
             if (node.checkAlive())
                 isAlive = "online";
 
+            // Timestamp
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
                     ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -170,12 +168,14 @@ public class ClientNode {
 
             String fileList;
 
+            // If file listing does not exist
             if (node.getFileList() == null) {
                 fileList = "Home folder not found";
             } else {
                 fileList = Arrays.toString(node.getFileList());
             }
 
+            // Main print 
             System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
                     node.socketInfo.getIp(),
                     node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);

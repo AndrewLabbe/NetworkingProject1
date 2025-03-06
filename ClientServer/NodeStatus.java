@@ -3,8 +3,10 @@ import java.io.Serializable;
 import config.SocketInfo;
 
 public class NodeStatus implements Serializable {
+    // Number of seconds without heartbeat that node is considered "dead"
     public static long TIMEOUT = 30000;
 
+    // Descriptive fields regarding node information
     private int nodeId;
     private long lastHeartbeat;
     private String[] fileNames;
@@ -21,6 +23,8 @@ public class NodeStatus implements Serializable {
         this.hasUpdated = hasUpdated;
     }
 
+    // Constructor to create a node status object for each node in the network
+    // Explicitly given fileNames array 
     public NodeStatus(int nodeID, String[] fileNames, String ip, int port) {
         this.nodeId = nodeID;
         this.socketInfo = new SocketInfo(ip, port);
@@ -29,6 +33,8 @@ public class NodeStatus implements Serializable {
         this.fileNames = fileNames;
     }
 
+    // Alternate constructor 
+    // Not given file names
     public NodeStatus(int nodeID, String ip, int port) {
         this(nodeID, new String[0], ip, port);
     }
@@ -47,7 +53,7 @@ public class NodeStatus implements Serializable {
 
     /**
      *
-     * @param fileList : list of files namnes from node home dir
+     * @param fileList : list of files names from node home directory
      * @param time     : time of the heartbeat recieved
      */
     public void updateStatus(String[] fileList, long time) {
@@ -66,8 +72,4 @@ public class NodeStatus implements Serializable {
         return System.currentTimeMillis() - lastHeartbeat < TIMEOUT;
     }
 
-    public void setLastHeartbeat(long timeStamp) {
-        this.lastHeartbeat = timeStamp;
-        hasUpdated = true;
-    }
 }
