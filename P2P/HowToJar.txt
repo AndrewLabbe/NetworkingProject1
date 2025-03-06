@@ -1,0 +1,4 @@
+# make sure your in the P2P Directory
+
+javac **/**.java
+jar cfe P2P.jar P2PNode -C . .
