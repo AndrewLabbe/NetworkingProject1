@@ -13,7 +13,8 @@ import config.IPConfig;
 import config.SocketInfo;
 
 public class ServerNode {
-    // Fields to store self info regarding socket, random interval of time for heartbeat sending and list of connected nodes in the network
+    // Fields to store self info regarding socket, random interval of time for
+    // heartbeat sending and list of connected nodes in the network
     DatagramSocket selfDatagramSocket = null;
     SecureRandom secureRandom = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
@@ -27,7 +28,8 @@ public class ServerNode {
      * @throws Exception
      */
     public ServerNode(int myPort) throws Exception {
-        // Populating self socket info (IP/Port) and creating DatagramSocket for connection purposes
+        // Populating self socket info (IP/Port) and creating DatagramSocket for
+        // connection purposes
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
 
@@ -67,9 +69,11 @@ public class ServerNode {
 
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                System.out.println("Packet received from " + incomingPacket.getAddress().getHostAddress() + ":"
+                        + incomingPacket.getPort() + " with type " + packet.getType());
 
                 // check that it is a client packet
-                if (packet.getType() == 0) { 
+                if (packet.getType() == 0) {
                     NodeStatus node = packet.getNode(0);
                     connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
                 }
@@ -128,7 +132,8 @@ public class ServerNode {
                 + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
 
         // Iterate though all connectedNode list to print out respective node status(s)
-        // Used to print out node information regarding if alive, last heartbeat sent and file listing(s)
+        // Used to print out node information regarding if alive, last heartbeat sent
+        // and file listing(s)
         for (NodeStatus node : connectedNodes) {
             String isAlive = "offline";
             if (!node.hasUpdated) {

@@ -13,7 +13,8 @@ import config.IPConfig;
 import config.SocketInfo;
 
 public class ClientNode {
-    // Fields to store self info regarding socket, random interval of time for heartbeat sending and list of connected nodes in the network
+    // Fields to store self info regarding socket, random interval of time for
+    // heartbeat sending and list of connected nodes in the network
     DatagramSocket selfDatagramSocket = null;
     SecureRandom secureRandom = new SecureRandom();
     ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
@@ -57,7 +58,8 @@ public class ClientNode {
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 // accept packet
                 selfDatagramSocket.receive(incomingPacket);
-
+                System.out.println(
+                        "Received packet from: " + incomingPacket.getAddress() + ":" + incomingPacket.getPort());
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
@@ -83,7 +85,7 @@ public class ClientNode {
             DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
                     new NodeStatus(this.nodeId, getFileList(), ip, port),
                     ip, port);
-            // System.out.println("Sending heartbeat to " + ip + ":" + port);
+            System.out.println("Sending heartbeat to " + ip + ":" + port);
             selfDatagramSocket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +101,8 @@ public class ClientNode {
         String directory = System.getProperty("user.dir");
         File homeFolder = new File(directory + "/Home/");
 
-        // If does not exist, return null for computation purposes in printing node status
+        // If does not exist, return null for computation purposes in printing node
+        // status
         if (!homeFolder.exists()) {
             return null;
         }
@@ -138,14 +141,15 @@ public class ClientNode {
         System.out.println("----------------------");
         System.out.println("Node status as of: "
                 + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
-        
+
         // Case if no nodes currently connected on the network
         if (connectedNodes.size() == 0) {
             System.out.println("No node status received from server yet.");
             return;
         }
 
-        // Iterate though each node connected to print status and other related information
+        // Iterate though each node connected to print status and other related
+        // information
         for (NodeStatus node : connectedNodes) {
             if (node.getNodeId() == nodeId)
                 continue; // if is self continue
@@ -175,7 +179,7 @@ public class ClientNode {
                 fileList = Arrays.toString(node.getFileList());
             }
 
-            // Main print 
+            // Main print
             System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
                     node.socketInfo.getIp(),
                     node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
