@@ -66,6 +66,8 @@ public class ClientNode {
                         if (packet.getType() == 1) // check that it is a server packet
                             connectedNodes = packet.getConnectedNodes();
 
+                            System.out.println("Received packet from server and decoded");
+
                     } catch (Exception e) {
                         System.out.println("Error with deserialization");
                     }
