@@ -36,7 +36,7 @@ public class ProtocolPacket implements Serializable {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
-            // ToDo: add first line in byte array as header size
+            out.writeInt(HEADER_SIZE);
 
             out.writeObject(obj);
             out.flush();
@@ -49,9 +49,9 @@ public class ProtocolPacket implements Serializable {
     // Given byte array, turn it back into protocol packet object
     public static ProtocolPacket deserializePacket(byte[] bytes)
             throws ClassNotFoundException, IOException {
-        // ToDo: skip first line in byte array as header size
-
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        // skip first element which is header size
+        bis.skip(Long.BYTES);
 
         ObjectInput in = new ObjectInputStream(bis);
         return (ProtocolPacket) in.readObject();
