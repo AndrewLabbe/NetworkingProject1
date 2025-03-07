@@ -1,4 +1,6 @@
 # make sure your in the P2P Directory
 
 javac **/**.java
-jar cfe P2P.jar P2PNode -C . .
+jar ce P2P.jar P2PNode -C . .
+
+jar --create --file P2P.jar --main-class P2PNode -m MANIFEST.MF @class.list

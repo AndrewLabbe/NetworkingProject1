@@ -1,5 +1,6 @@
 # make sure your in the ClientServer Directory
 
 javac **/**.java
-jar cfe ServerNode.jar ServerNode -C . .
-jar cfe ClientNode.jar ClientNode -C . .
+
+jar --create --file ClientNode.jar --main-class ClientNode -m MANIFEST.MF @class.list
+jar --create --file ServerNode.jar --main-class ServerNode -m MANIFEST.MF @class.list
