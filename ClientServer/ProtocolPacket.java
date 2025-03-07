@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 public class ProtocolPacket implements Serializable {
 
-    // Header size = 10 bytes given the three header fields below
     public static final int HEADER_SIZE = 10;
     // Headers
     private byte version = 1;
@@ -21,23 +20,24 @@ public class ProtocolPacket implements Serializable {
     private byte type = 0;
     private long sentTimestamp = 0; // automatically
 
-    // Body/data
+    // Body
+    // private String[] fileNames = null;
     private ArrayList<NodeStatus> connectedNodes = new ArrayList<NodeStatus>();
 
-    // Packet constructor defining headers
+    // private ProtocolPacket(int senderId, long timestamp, String[] fileNames) {
     private ProtocolPacket(ArrayList<NodeStatus> connectedNodes, byte type) {
         this.version = 1;
         this.type = type;
         this.connectedNodes = connectedNodes;
+        // this.fileNames = fileNames;
+        // this.senderId = senderId;
+        // this.timestamp = timestamp;
     }
 
-    // Turn Packet object into bytes
     private static byte[] serialize(final Object obj) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
-            out.writeInt(HEADER_SIZE);
-
             out.writeObject(obj);
             out.flush();
             return bos.toByteArray();
@@ -46,25 +46,25 @@ public class ProtocolPacket implements Serializable {
         }
     }
 
-    // Given byte array, turn it back into protocol packet object
     public static ProtocolPacket deserializePacket(byte[] bytes)
             throws ClassNotFoundException, IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        // skip first element which is header size
-        bis.skip(Long.BYTES);
 
         ObjectInput in = new ObjectInputStream(bis);
         return (ProtocolPacket) in.readObject();
     }
 
     /**
-     * @param node : Node status being transmitted
-     * @param ip   : where to send to
-     * @param port : where to send to
+     * 
+     * @param id
+     * @param fileNames
+     * @param ip        : where to send to
+     * @param port      : where to send to
      * @return
      * @throws UnknownHostException
      * @throws StreamCorruptedException
      */
+
     public static DatagramPacket generateClientDatagramPacket(NodeStatus node, String ip, int port)
             throws UnknownHostException, StreamCorruptedException {
         ArrayList<NodeStatus> list = new ArrayList<>();
@@ -74,15 +74,6 @@ public class ProtocolPacket implements Serializable {
         return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
     }
 
-    /**
-     *
-     * @param nodes : Node status(s) being transmitted
-     * @param ip    : where to send to
-     * @param port  : where to send to
-     * @return
-     * @throws UnknownHostException
-     * @throws StreamCorruptedException
-     */
     public static DatagramPacket generateServerDatagramPacket(ArrayList<NodeStatus> nodes, String ip, int port)
             throws UnknownHostException, StreamCorruptedException {
         ProtocolPacket packet = new ProtocolPacket(nodes, (byte) 1);
@@ -90,7 +81,6 @@ public class ProtocolPacket implements Serializable {
         return new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
     }
 
-    // Getters and Setters
     public byte getVersion() {
         return version;
     }

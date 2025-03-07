@@ -34,7 +34,6 @@ public class ClientNode {
         // self info
         selfSocketInfo = new SocketInfo(getSelfIP(), myPort);
         selfDatagramSocket = new DatagramSocket(myPort);
-
         // server socket info
         serverSocketInfo = IPConfig.getServerSocket();
 
@@ -67,6 +66,8 @@ public class ClientNode {
                             Thread.sleep(1000);
                         }
                     }
+                } else {
+                    System.out.println("Connected to server");
                 }
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 // accept packet
