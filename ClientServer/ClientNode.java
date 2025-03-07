@@ -104,7 +104,7 @@ public class ClientNode {
      */
     private static String[] getFileList() {
         String directory = System.getProperty("user.dir");
-        File homeFolder = new File(directory + "/Home/");
+        File homeFolder = new File(directory + "/home/");
 
         // If does not exist, return null for computation purposes in printing node
         // status
@@ -205,8 +205,8 @@ public class ClientNode {
             while (true) {
                 // Send heartbeat to server
                 sendHeartbeat();
-                long sleepTime = 2000;
-                // long sleepTime = secureRandom.nextInt(30001);
+                // long sleepTime = 2000;
+                long sleepTime = secureRandom.nextInt(30001);
                 Thread.sleep(sleepTime);
             }
         } catch (Exception e) {
@@ -253,7 +253,7 @@ public class ClientNode {
                 try {
                     while (true) {
                         // sleep for 15 seconds
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep(20 * 1000);
                         client.printNodeStatus();
                     }
                 } catch (InterruptedException e) {
