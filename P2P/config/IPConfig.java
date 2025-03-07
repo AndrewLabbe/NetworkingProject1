@@ -8,8 +8,9 @@ import java.util.Properties;
 
 public class IPConfig {
 
-    private static File configFile = new File("config.properties");
+    private static File configFile = new File("P2PConfig.properties");
     private static Properties config = null;
+    public static int DEFAULT_PORT = 9876;
 
     private static SocketInfo[] socketInfos = null;
 
@@ -39,6 +40,8 @@ public class IPConfig {
      * @throws IOException
      */
     private static void loadSockets() throws IOException {
+        System.out.println("Loading sockets (if no port provided for a node, default port is " + DEFAULT_PORT + ")");
+
         if (config != null)
             return;
         try {
@@ -46,25 +49,48 @@ public class IPConfig {
             FileInputStream propsInput = new FileInputStream(configFile);
             config.load(propsInput);
         } catch (IOException e) {
-            throw new IOException("Failed to load config file" + e.getMessage());
+            System.out.println();
+            System.err.println(
+                    "ERROR: Config file not valid, make sure to create and properly configure the file: "
+                            + configFile.getPath());
+            System.exit(1);
         }
         int index = 0;
         ArrayList<SocketInfo> sockets = new ArrayList<>();
         System.out.println("Loading sockets");
         do {
             try {
-                String serverKey = "server" + index + ".";
-                sockets.add(new SocketInfo(config.getProperty(serverKey + "ip"),
-                        Integer.parseInt(config.getProperty(serverKey + "port"))));
+                String nodeKey = "node" + index + ".";
+
+                String ip = config.getProperty(nodeKey + "ip");
+                if (ip == null) {
+                    if (index == 0) {
+                        System.out.println();
+                        System.err.println(
+                                "ERROR: No ips found in config file, make sure to create and properly configure the file:"
+                                        + configFile.getPath());
+                        System.exit(1);
+                    }
+                    break;
+                }
+                int port = DEFAULT_PORT;
+                if (config.getProperty(nodeKey + "port") != null) {
+                    port = Integer.parseInt(config.getProperty(nodeKey + "port"));
+                }
+
+                sockets.add(new SocketInfo(ip, port));
                 index++;
-                // when error, there is no more sockets in config
             } catch (Exception e) {
-                break;
+                throw new IOException("Error loading sockets from config file please check if config is valid");
             }
         } while (true);
 
         if (sockets.size() == 0) {
-            throw new IOException("No sockets found in config file");
+            System.out.println();
+            System.err.println(
+                    "ERROR: No sockets found in config file, make sure to create and properly configure the file:"
+                            + configFile.getPath());
+            System.exit(1);
         }
         socketInfos = sockets.toArray(new SocketInfo[sockets.size()]);
     }

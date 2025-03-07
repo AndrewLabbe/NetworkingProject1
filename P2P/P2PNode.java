@@ -262,9 +262,9 @@ public class P2PNode {
             public void run() {
                 try {
                     while (true) {
+                        server.printNodeStatus();
                         // sleep for 20 seconds
                         Thread.sleep(20 * 1000);
-                        server.printNodeStatus();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
