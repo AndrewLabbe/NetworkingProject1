@@ -57,9 +57,10 @@ public class NodeStatus implements Serializable {
      * @param time     : time of the heartbeat recieved
      */
     public void updateStatus(String[] fileList, long time) {
-        this.fileNames = fileList;
-        if (this.lastHeartbeat < time)
+        if (this.lastHeartbeat < time){
+            this.fileNames = fileList;
             this.lastHeartbeat = time;
+        }
         hasUpdated = true;
     }
 

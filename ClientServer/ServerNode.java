@@ -74,8 +74,9 @@ public class ServerNode {
 
                 // check that it is a client packet
                 if (packet.getType() == 0) {
-                    NodeStatus node = packet.getNode(0);
-                    connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
+                    NodeStatus newStatus = packet.getNode(0);
+                    NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
+                    curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
                 }
 
                 Thread.sleep(1000);
