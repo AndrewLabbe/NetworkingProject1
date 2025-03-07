@@ -36,6 +36,8 @@ public class ProtocolPacket implements Serializable {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            // ToDo: add first line in byte array as header size
+
             out.writeObject(obj);
             out.flush();
             return bos.toByteArray();
@@ -47,6 +49,8 @@ public class ProtocolPacket implements Serializable {
     // Given byte array, turn it back into protocol packet object
     public static ProtocolPacket deserializePacket(byte[] bytes)
             throws ClassNotFoundException, IOException {
+        // ToDo: skip first line in byte array as header size
+
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 
         ObjectInput in = new ObjectInputStream(bis);
@@ -54,10 +58,9 @@ public class ProtocolPacket implements Serializable {
     }
 
     /**
-     * 
-     * @param node      : Node status being transmitted
-     * @param ip        : where to send to
-     * @param port      : where to send to
+     * @param node : Node status being transmitted
+     * @param ip   : where to send to
+     * @param port : where to send to
      * @return
      * @throws UnknownHostException
      * @throws StreamCorruptedException
@@ -72,10 +75,10 @@ public class ProtocolPacket implements Serializable {
     }
 
     /**
-     * 
-     * @param nodes     : Node status(s) being transmitted
-     * @param ip        : where to send to
-     * @param port      : where to send to
+     *
+     * @param nodes : Node status(s) being transmitted
+     * @param ip    : where to send to
+     * @param port  : where to send to
      * @return
      * @throws UnknownHostException
      * @throws StreamCorruptedException

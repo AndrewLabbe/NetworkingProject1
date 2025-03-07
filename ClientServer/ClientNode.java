@@ -58,15 +58,24 @@ public class ClientNode {
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 // accept packet
                 selfDatagramSocket.receive(incomingPacket);
-                System.out.println(
-                        "Received packet from: " + incomingPacket.getAddress() + ":" + incomingPacket.getPort());
+
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+
+                System.out.println("====");
+                System.out.println("Data recieved from server: ");
+                for (NodeStatus node : packet.getConnectedNodes()) {
+                    long time = node.getLastHeartbeat();
+                    float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
+                    System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", node.getNodeId(), time, timeSince);
+                    System.out.println();
+                }
+                System.out.println("====");
 
                 if (packet.getType() == 1) // check that it is a server packet
                     connectedNodes = packet.getConnectedNodes();
 
-                Thread.sleep(1000);
+                Thread.sleep(10);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);
@@ -82,11 +91,18 @@ public class ClientNode {
 
         // Create datagram packet using the filelist of itself, alongside its nodeId
         try {
-            DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(
-                    new NodeStatus(this.nodeId, getFileList(), ip, port),
-                    ip, port);
-            System.out.println("Sending heartbeat to " + ip + ":" + port);
+            NodeStatus update = new NodeStatus(this.nodeId, getFileList(), ip, port);
+
+            DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(update, ip, port);
+
+            System.out.println("====");
+            long time = update.getLastHeartbeat();
+            float timeSince = ((System.currentTimeMillis() - time)
+                    / 1000.0f);
+            System.out.printf("Sending to Server: heartbeat long: %f, timeSince: %f", time, timeSince);
+            System.out.println("====");
             selfDatagramSocket.send(packet);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,7 +110,7 @@ public class ClientNode {
 
     /**
      * Get the list of files of node's home directory
-     * 
+     *
      * @return fileList
      */
     private static String[] getFileList() {
@@ -157,6 +173,7 @@ public class ClientNode {
             // Node has not yet sent heartbeat
             if (!node.hasUpdated) {
                 System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
+
                 System.out.println();
                 continue;
             }

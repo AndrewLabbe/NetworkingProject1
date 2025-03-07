@@ -42,7 +42,6 @@ public class ServerNode {
      *
      * @throws IOException
      */
-    // ToDo: config file needs to be at root to run using the play button, but
     // should be in p2p folder when turned into jar
     private void loadClients() throws IOException {
         // load external nodes from file
@@ -69,8 +68,14 @@ public class ServerNode {
 
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
-                System.out.println("Packet received from " + incomingPacket.getAddress().getHostAddress() + ":"
-                        + incomingPacket.getPort() + " with type " + packet.getType());
+
+                System.out.println("====");
+                int newId = packet.getConnectedNodes().get(0).getNodeId();
+                long time = packet.getConnectedNodes().get(0).getLastHeartbeat();
+                float timeSince = ((System.currentTimeMillis() - time)
+                        / 1000.0f);
+                System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", newId, time, timeSince);
+                System.out.println("====");
 
                 // check that it is a client packet
                 if (packet.getType() == 0) {
@@ -79,7 +84,7 @@ public class ServerNode {
                     curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
                 }
 
-                Thread.sleep(1000);
+                Thread.sleep(10);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);
@@ -92,6 +97,19 @@ public class ServerNode {
      * @param info
      */
     public void sendClientInfo() {
+        // print all the time since and longs for each node in connectnodes that is is
+        // about to send
+
+        System.out.println("====");
+        System.out.println("Data being sent to clients: ");
+        for (NodeStatus node : connectedNodes) {
+            long time = node.getLastHeartbeat();
+            float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
+            System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", node.getNodeId(), time, timeSince);
+            System.out.println();
+        }
+        System.out.println("====");
+
         for (NodeStatus node : connectedNodes) {
             // Pulling self IP/Port
             String ip = node.socketInfo.getIp();
@@ -101,7 +119,6 @@ public class ServerNode {
             try {
                 DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
                 selfDatagramSocket.send(packet);
-                System.out.println("Sending heartbeat to " + ip + ":" + port);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -110,7 +127,7 @@ public class ServerNode {
 
     /**
      * Get the IP address of the current machine
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -170,7 +187,7 @@ public class ServerNode {
     /**
      * Runs a loop to send heartbeats to all connected nodes every 0-30 seconds
      * (randomized each time)
-     * 
+     *
      * @throws Exception
      */
     public void createHeartbeatProcess() {
