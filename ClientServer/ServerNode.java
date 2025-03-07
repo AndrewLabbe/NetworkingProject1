@@ -61,22 +61,27 @@ public class ServerNode {
             byte[] incomingData = new byte[1024];
 
             while (true) {
-                // create datagram packet using incoming data as paramater
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                // accept packet
-                selfDatagramSocket.receive(incomingPacket);
+                try {
+                    // create datagram packet using incoming data as paramater
+                    DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                    // accept packet
+                    selfDatagramSocket.receive(incomingPacket);
 
-                // decode packet
-                ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                    // decode packet
+                    ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                // check that it is a client packet
-                if (packet.getType() == 0) {
-                    NodeStatus newStatus = packet.getNode(0);
-                    NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
-                    curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                    // check that it is a client packet
+                    if (packet.getType() == 0) {
+                        NodeStatus newStatus = packet.getNode(0);
+                        NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
+                        curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                    }
+
+                    Thread.sleep(10);
+                } catch (Exception e) {
+                    System.out.println("Cannot access network");
+                    Thread.sleep(1000);
                 }
-
-                Thread.sleep(10);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);

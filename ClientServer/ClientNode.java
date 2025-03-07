@@ -54,32 +54,22 @@ public class ClientNode {
             byte[] incomingData = new byte[1024];
 
             while (true) {
-                if (!selfDatagramSocket.isConnected()) {
-                    while (true) {
-                        try {
-                            selfDatagramSocket.connect(InetAddress.getByName(serverSocketInfo.getIp()),
-                                    serverSocketInfo.getPort());
-                            System.out.println("Connected to server");
-                            break;
-                        } catch (Exception e) {
-                            System.out.println("Failed to connect to server, retrying...");
-                            Thread.sleep(1000);
-                        }
-                    }
-                } else {
-                    System.out.println("Connected to server");
+                try {
+                    DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                    // accept packet
+                    selfDatagramSocket.receive(incomingPacket);
+
+                    // decode packet
+                    ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+
+                    if (packet.getType() == 1) // check that it is a server packet
+                        connectedNodes = packet.getConnectedNodes();
+
+                    Thread.sleep(10);
+                } catch (Exception e) {
+                    System.out.println("Cannot reach network");
+                    Thread.sleep(1000);
                 }
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                // accept packet
-                selfDatagramSocket.receive(incomingPacket);
-
-                // decode packet
-                ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
-
-                if (packet.getType() == 1) // check that it is a server packet
-                    connectedNodes = packet.getConnectedNodes();
-
-                Thread.sleep(10);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);
@@ -100,22 +90,10 @@ public class ClientNode {
 
             DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(update, ip, port);
 
-            if (!selfDatagramSocket.isConnected()) {
-                while (true) {
-                    try {
-                        selfDatagramSocket.connect(InetAddress.getByName(ip), port);
-                        System.out.println("Connected to server");
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("Failed to connect to server, retrying...");
-                        Thread.sleep(1000);
-                    }
-                }
-            }
             selfDatagramSocket.send(packet);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Cannot reach server, packet skipped");
         }
     }
 
