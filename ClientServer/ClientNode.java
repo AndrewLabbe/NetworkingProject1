@@ -58,6 +58,7 @@ public class ClientNode {
                     DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                     // accept packet
                     selfDatagramSocket.receive(incomingPacket);
+                    System.out.println("Took in packet");
 
                     // decode packet
                     try {
@@ -65,8 +66,7 @@ public class ClientNode {
 
                         if (packet.getType() == 1) // check that it is a server packet
                             connectedNodes = packet.getConnectedNodes();
-
-                            System.out.println("Received packet from server and decoded");
+                        System.out.println("Deserialized packet");
 
                     } catch (Exception e) {
                         System.out.println("Error with deserialization");
@@ -167,9 +167,7 @@ public class ClientNode {
 
             // Node has not yet sent heartbeat
             if (!node.hasUpdated) {
-                // System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId())
-                System.out.printf("Node %d (%s:%d): has not sent a heartbeat yet", node.getNodeId(),
-                        node.socketInfo.getIp(), node.socketInfo.getPort());
+                System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
 
                 System.out.println();
                 continue;
