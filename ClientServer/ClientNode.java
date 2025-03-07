@@ -175,7 +175,7 @@ public class ClientNode {
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
                     ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-            float timeSince = ((currentTime - node.getLastHeartbeat()) / 1000.0f);
+            int timeSince = ((int) (currentTime - node.getLastHeartbeat()) / 1000);
 
             String fileList;
 
@@ -187,7 +187,7 @@ public class ClientNode {
             }
 
             // Main print
-            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%d s) and has files: %s", node.getNodeId(),
                     node.socketInfo.getIp(),
                     node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();

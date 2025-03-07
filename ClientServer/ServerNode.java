@@ -96,18 +96,18 @@ public class ServerNode {
     public void sendClientInfo() {
         ;
 
-        for (NodeStatus node : connectedNodes) {
-            // Pulling self IP/Port
-            String ip = node.socketInfo.getIp();
-            int port = node.socketInfo.getPort();
+        try {
+            for (NodeStatus node : connectedNodes) {
+                // Pulling self IP/Port
+                String ip = node.socketInfo.getIp();
+                int port = node.socketInfo.getPort();
 
-            // Forming the packet with respective info/data to be sent to clients
-            try {
+                // Forming the packet with respective info/data to be sent to clients
                 DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
                 selfDatagramSocket.send(packet);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            System.out.println("Cannot reach client, packet skipped");
         }
     }
 
@@ -151,7 +151,7 @@ public class ServerNode {
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
                     ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-            float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
+            int timeSince = (int) ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000);
 
             String fileList;
 
@@ -163,7 +163,7 @@ public class ServerNode {
             }
 
             // Actual print statement
-            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%f s) and has files: %s", node.getNodeId(),
+            System.out.printf("Node %d (%s:%d): is %s, last heartbeat %s (%d s) and has files: %s", node.getNodeId(),
                     node.socketInfo.getIp(),
                     node.socketInfo.getPort(), isAlive, timeStamp, timeSince, fileList);
             System.out.println();
