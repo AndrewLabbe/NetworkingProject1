@@ -166,10 +166,11 @@ public class ClientNode {
                 isAlive = "online";
 
             // Timestamp
+            long currentTime = System.currentTimeMillis();
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
                     ZoneId.systemDefault());
             String timeStamp = dateTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-            float timeSince = ((System.currentTimeMillis() - node.getLastHeartbeat()) / 1000.0f);
+            float timeSince = ((currentTime - node.getLastHeartbeat()) / 1000.0f);
 
             String fileList;
 
