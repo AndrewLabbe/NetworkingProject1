@@ -62,16 +62,6 @@ public class ClientNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                System.out.println("====");
-                System.out.println("Data recieved from server: ");
-                for (NodeStatus node : packet.getConnectedNodes()) {
-                    long time = node.getLastHeartbeat();
-                    float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
-                    System.out.printf("Node %d: heartbeat long: %d, timeSince: %f\n", node.getNodeId(), time,
-                            timeSince);
-                }
-                System.out.println("====");
-
                 if (packet.getType() == 1) // check that it is a server packet
                     connectedNodes = packet.getConnectedNodes();
 
@@ -95,12 +85,6 @@ public class ClientNode {
 
             DatagramPacket packet = ProtocolPacket.generateClientDatagramPacket(update, ip, port);
 
-            System.out.println("====");
-            long time = update.getLastHeartbeat();
-            float timeSince = ((System.currentTimeMillis() - time)
-                    / 1000.0f);
-            System.out.printf("Sending to Server: heartbeat long: %d, timeSince: %f\n", time, timeSince);
-            System.out.println("====");
             selfDatagramSocket.send(packet);
 
         } catch (Exception e) {

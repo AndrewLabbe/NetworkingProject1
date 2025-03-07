@@ -69,14 +69,6 @@ public class ServerNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                System.out.println("====");
-                int newId = packet.getConnectedNodes().get(0).getNodeId();
-                long time = packet.getConnectedNodes().get(0).getLastHeartbeat();
-                float timeSince = ((System.currentTimeMillis() - time)
-                        / 1000.0f);
-                System.out.printf("Node %d: heartbeat long: %d, timeSince: %f\n", newId, time, timeSince);
-                System.out.println("====");
-
                 // check that it is a client packet
                 if (packet.getType() == 0) {
                     NodeStatus newStatus = packet.getNode(0);
@@ -97,18 +89,7 @@ public class ServerNode {
      * @param info
      */
     public void sendClientInfo() {
-        // print all the time since and longs for each node in connectnodes that is is
-        // about to send
-
-        System.out.println("====");
-        System.out.println("Data being sent to clients: ");
-        for (NodeStatus node : connectedNodes) {
-            long time = node.getLastHeartbeat();
-            float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
-            System.out.printf("Node %d: heartbeat long: %d, timeSince: %f", node.getNodeId(), time, timeSince);
-            System.out.println();
-        }
-        System.out.println("====");
+        ;
 
         for (NodeStatus node : connectedNodes) {
             // Pulling self IP/Port
