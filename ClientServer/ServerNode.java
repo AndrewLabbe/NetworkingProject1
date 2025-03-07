@@ -74,7 +74,7 @@ public class ServerNode {
                 long time = packet.getConnectedNodes().get(0).getLastHeartbeat();
                 float timeSince = ((System.currentTimeMillis() - time)
                         / 1000.0f);
-                System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", newId, time, timeSince);
+                System.out.printf("Node %d: heartbeat long: %d, timeSince: %f\n", newId, time, timeSince);
                 System.out.println("====");
 
                 // check that it is a client packet
@@ -105,7 +105,7 @@ public class ServerNode {
         for (NodeStatus node : connectedNodes) {
             long time = node.getLastHeartbeat();
             float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
-            System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", node.getNodeId(), time, timeSince);
+            System.out.printf("Node %d: heartbeat long: %d, timeSince: %f", node.getNodeId(), time, timeSince);
             System.out.println();
         }
         System.out.println("====");

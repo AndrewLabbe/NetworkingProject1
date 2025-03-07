@@ -67,8 +67,8 @@ public class ClientNode {
                 for (NodeStatus node : packet.getConnectedNodes()) {
                     long time = node.getLastHeartbeat();
                     float timeSince = ((System.currentTimeMillis() - time) / 1000.0f);
-                    System.out.printf("Node %d: heartbeat long: %f, timeSince: %f", node.getNodeId(), time, timeSince);
-                    System.out.println();
+                    System.out.printf("Node %d: heartbeat long: %d, timeSince: %f\n", node.getNodeId(), time,
+                            timeSince);
                 }
                 System.out.println("====");
 
@@ -99,7 +99,7 @@ public class ClientNode {
             long time = update.getLastHeartbeat();
             float timeSince = ((System.currentTimeMillis() - time)
                     / 1000.0f);
-            System.out.printf("Sending to Server: heartbeat long: %f, timeSince: %f", time, timeSince);
+            System.out.printf("Sending to Server: heartbeat long: %d, timeSince: %f\n", time, timeSince);
             System.out.println("====");
             selfDatagramSocket.send(packet);
 
