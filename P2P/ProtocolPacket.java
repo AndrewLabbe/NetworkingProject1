@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class ProtocolPacket implements Serializable {
 
-    public static final int HEADER_SIZE = 16;
+    public static final int HEADER_SIZE = 10;
     // Headers
     private byte version = 1;
     // 0 = client 1 = server
