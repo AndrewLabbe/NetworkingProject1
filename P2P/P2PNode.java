@@ -169,6 +169,9 @@ public class P2PNode {
             }
 
             String isAlive = "offline";
+            if (node.checkAlive()) {
+                isAlive = "online";
+            }
             // Timestamp
             long currentTime = System.currentTimeMillis();
             LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()),
