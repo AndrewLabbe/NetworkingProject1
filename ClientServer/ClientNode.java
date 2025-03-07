@@ -165,7 +165,9 @@ public class ClientNode {
 
             // Node has not yet sent heartbeat
             if (!node.hasUpdated) {
-                System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId());
+                // System.out.printf("Node %d: has not sent a heartbeat yet", node.getNodeId())
+                System.out.printf("Node %d (%s:%d): has not sent a heartbeat yet", node.getNodeId(),
+                        node.socketInfo.getIp(), node.socketInfo.getPort());
 
                 System.out.println();
                 continue;
