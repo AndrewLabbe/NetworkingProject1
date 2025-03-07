@@ -101,6 +101,7 @@ public class ServerNode {
             try {
                 DatagramPacket packet = ProtocolPacket.generateServerDatagramPacket(connectedNodes, ip, port);
                 selfDatagramSocket.send(packet);
+                System.out.println("Sending heartbeat to " + ip + ":" + port);
             } catch (Exception e) {
                 e.printStackTrace();
             }
