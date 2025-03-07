@@ -181,8 +181,8 @@ public class ServerNode {
             while (true) {
                 // Send node info to each client
                 sendClientInfo();
-                long sleepTime = 2000;
-                // long sleepTime = secureRandom.nextInt(30001);
+                // long sleepTime = 2000;
+                long sleepTime = secureRandom.nextInt(30001);
                 Thread.sleep(sleepTime);
             }
         } catch (Exception e) {
@@ -230,7 +230,7 @@ public class ServerNode {
                 try {
                     while (true) {
                         // sleep for 15 seconds
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep(20 * 1000);
                         server.printNodeStatus();
                     }
                 } catch (InterruptedException e) {
