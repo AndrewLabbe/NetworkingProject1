@@ -29,6 +29,7 @@ public class ProtocolPacket implements Serializable {
         this.version = 1;
         this.type = type;
         this.connectedNodes = connectedNodes;
+        this.sentTimestamp =  System.currentTimeMillis();
         // this.fileNames = fileNames;
         // this.senderId = senderId;
         // this.timestamp = timestamp;
