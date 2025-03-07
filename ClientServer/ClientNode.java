@@ -60,11 +60,15 @@ public class ClientNode {
                     selfDatagramSocket.receive(incomingPacket);
 
                     // decode packet
-                    ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                    try{
+                        ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                    if (packet.getType() == 1) // check that it is a server packet
+                        if (packet.getType() == 1) // check that it is a server packet
                         connectedNodes = packet.getConnectedNodes();
 
+                    } catch (Exception e){
+                        System.out.println("Error with deserialization");
+                    }
                     Thread.sleep(10);
                 } catch (Exception e) {
                     System.out.println("Cannot reach network");
@@ -223,9 +227,9 @@ public class ClientNode {
             System.out.println(myPort);
         } else {
             System.out.println("No port specified, using default port 9876");
-            System.out.println("(Ex: java -jar P2PNode.jar 9876)");
+            System.out.println("(Ex: java -jar ClientNode.jar 9876)");
         }
-        System.out.println("Starting P2PNode on port " + myPort);
+        System.out.println("Starting ClientNode on port " + myPort);
         // int myPort = 9877;
         ClientNode client;
         try {

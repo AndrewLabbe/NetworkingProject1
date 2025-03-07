@@ -67,14 +67,18 @@ public class ServerNode {
                     // accept packet
                     selfDatagramSocket.receive(incomingPacket);
 
-                    // decode packet
-                    ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                    try {
+                        // decode packet
+                        ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                    // check that it is a client packet
-                    if (packet.getType() == 0) {
-                        NodeStatus newStatus = packet.getNode(0);
-                        NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
-                        curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                        // check that it is a client packet
+                        if (packet.getType() == 0) {
+                            NodeStatus newStatus = packet.getNode(0);
+                            NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
+                            curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Problem with Deserialization");
                     }
 
                     Thread.sleep(10);
@@ -199,9 +203,9 @@ public class ServerNode {
             System.out.println(myPort);
         } else {
             System.out.println("No port specified, using default port 9876");
-            System.out.println("(Ex: java -jar P2PNode.jar 9876)");
+            System.out.println("(Ex: java -jar ServerNode.jar 9876)");
         }
-        System.out.println("Starting P2PNode on port " + myPort);
+        System.out.println("Starting ServerNode on port " + myPort);
         // int myPort = 9877;
         ServerNode server;
         try {

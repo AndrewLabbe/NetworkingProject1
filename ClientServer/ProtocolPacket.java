@@ -39,6 +39,7 @@ public class ProtocolPacket implements Serializable {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            out.writeInt(HEADER_SIZE);
             out.writeObject(obj);
             out.flush();
             return bos.toByteArray();
@@ -50,8 +51,14 @@ public class ProtocolPacket implements Serializable {
     public static ProtocolPacket deserializePacket(byte[] bytes)
             throws ClassNotFoundException, IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-
         ObjectInput in = new ObjectInputStream(bis);
+
+        // Skip the first integer (HEADER_SIZE)
+        int headerSize = in.readInt(); 
+        if (headerSize != HEADER_SIZE) {
+            throw new StreamCorruptedException("Invalid header size detected");
+        }
+
         return (ProtocolPacket) in.readObject();
     }
 
