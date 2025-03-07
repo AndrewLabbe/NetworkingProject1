@@ -74,21 +74,12 @@ public class P2PNode {
                 // decode packet
                 ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                // update node status
-                // connectedNodes.get(packet.getSenderId()).updateStatus(packet.getFileNames(),
-                // packet.getTimestamp());
-
                 if (packet.getType() == 0) { // check that it is a client packet
                     NodeStatus node = packet.getNode(0);
                     connectedNodes.get(node.getNodeId()).updateStatus(node.getFileList(), node.getLastHeartbeat());
                 }
 
-                InetAddress IPAddress = incomingPacket.getAddress();
-                int port = incomingPacket.getPort();
-                // System.out.println("Received heartbeat from " + IPAddress.getHostAddress() +
-                // ":" + port);
-
-                Thread.sleep(1000);
+                Thread.sleep(10);
             }
         } catch (Exception e) {
             throw new RuntimeException("Listening process was interupted", e);
