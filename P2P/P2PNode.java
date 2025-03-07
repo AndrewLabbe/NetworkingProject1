@@ -72,13 +72,17 @@ public class P2PNode {
                     // accept packet
                     selfDatagramSocket.receive(incomingPacket);
 
-                    // decode packet
-                    ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
+                    try {
+                        // decode packet
+                        ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
-                    if (packet.getType() == 0) { // check that it is a client packet
-                        NodeStatus newStatus = packet.getNode(0);
-                        NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
-                        curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                        if (packet.getType() == 0) { // check that it is a client packet
+                            NodeStatus newStatus = packet.getNode(0);
+                            NodeStatus curStatus = connectedNodes.get(newStatus.getNodeId());
+                            curStatus.updateStatus(newStatus.getFileList(), newStatus.getLastHeartbeat());
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error with deserialization process");
                     }
 
                     Thread.sleep(10);
