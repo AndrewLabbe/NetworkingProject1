@@ -211,8 +211,8 @@ public class P2PNode {
                         continue; // if is self continue
                     sendHeartbeatTo(node);
                 }
-                long sleepTime = 2000;
-                // long sleepTime = secureRandom.nextInt(30001);
+                // long sleepTime = 2000;
+                long sleepTime = secureRandom.nextInt(30001);
                 Thread.sleep(sleepTime);
             }
         } catch (Exception e) {
@@ -258,8 +258,8 @@ public class P2PNode {
             public void run() {
                 try {
                     while (true) {
-                        // sleep for 15 seconds
-                        Thread.sleep(5 * 1000);
+                        // sleep for 20 seconds
+                        Thread.sleep(20 * 1000);
                         server.printNodeStatus();
                     }
                 } catch (InterruptedException e) {
