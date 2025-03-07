@@ -1,6 +1,11 @@
 # make sure your in the ClientServer Directory
+# MAKE SURE TO REMOVE ANY EXISTING COMPILED .CLASS FILES SO COMPILED FILES ARE MOST RECENT VERSION
 
-javac **/**.java
-
+cd ../ClientServer
+javac ClientNode.java ServerNode.java
 jar --create --file ClientNode.jar --main-class ClientNode -m MANIFEST.MF @class.list
 jar --create --file ServerNode.jar --main-class ServerNode -m MANIFEST.MF @class.list
+cp ClientNode.jar ../jars/
+cp ServerNode.jar ../jars/
+rm -rf **/**.class
+cd ../jars

@@ -60,13 +60,13 @@ public class ClientNode {
                     selfDatagramSocket.receive(incomingPacket);
 
                     // decode packet
-                    try{
+                    try {
                         ProtocolPacket packet = ProtocolPacket.deserializePacket(incomingPacket.getData());
 
                         if (packet.getType() == 1) // check that it is a server packet
-                        connectedNodes = packet.getConnectedNodes();
+                            connectedNodes = packet.getConnectedNodes();
 
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         System.out.println("Error with deserialization");
                     }
                     Thread.sleep(10);
@@ -256,9 +256,9 @@ public class ClientNode {
             public void run() {
                 try {
                     while (true) {
-                        // sleep for 15 seconds
-                        Thread.sleep(20 * 1000);
                         client.printNodeStatus();
+                        // sleep for 20 seconds
+                        Thread.sleep(20 * 1000);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

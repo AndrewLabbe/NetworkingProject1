@@ -50,6 +50,7 @@ public class ServerNode {
             NodeStatus status = new NodeStatus(i, socket.getIp(), socket.getPort());
             status.setHasUpdated(false);
             connectedNodes.add(status);
+
         }
     }
 
@@ -233,9 +234,9 @@ public class ServerNode {
             public void run() {
                 try {
                     while (true) {
-                        // sleep for 15 seconds
-                        Thread.sleep(20 * 1000);
                         server.printNodeStatus();
+                        // sleep for 20 seconds
+                        Thread.sleep(20 * 1000);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

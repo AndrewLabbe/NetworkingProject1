@@ -8,8 +8,9 @@ import java.util.Properties;
 
 public class IPConfig {
 
-    private static File configFile = new File("clientserver.properties");
+    private static File configFile = new File("ClientServerConfig.properties");
     private static Properties config = null;
+    public static int DEFAULT_PORT = 9876;
 
     private static SocketInfo[] clientSocketInfos = null;
     private static SocketInfo serverSocketInfo = null;
@@ -39,18 +40,34 @@ public class IPConfig {
      *
      * @throws IOException
      */
-    // ToDo : support for server vs client
+
     private static void loadSockets() throws IOException {
+        System.out.println(
+                "Loading sockets (if no port provided for a server/client, default port is " + DEFAULT_PORT + ")");
         if (config != null)
             return;
         try {
             config = new Properties();
             FileInputStream propsInput = new FileInputStream(configFile);
             config.load(propsInput);
-            serverSocketInfo = new SocketInfo(config.getProperty("server.ip"),
-                    Integer.parseInt(config.getProperty("server.port")));
+            String ip = config.getProperty("server.ip");
+            if (ip == null) {
+                System.err.println("ERROR: No server ip provided in config file");
+                System.exit(1);
+            }
+            // def port if none provided
+            int port = DEFAULT_PORT;
+            if (config.getProperty("server.port") != null) {
+                port = Integer.parseInt(config.getProperty("server.port"));
+            }
+            serverSocketInfo = new SocketInfo(ip, port);
         } catch (IOException e) {
-            throw new IOException("Failed to load config file" + e.getMessage());
+            System.out.println();
+            System.err.println(
+                    "ERROR: Config file not valid, make sure to create and properly configure the file: "
+                            + configFile.getPath());
+            System.exit(1);
+
         }
         int index = 0;
         ArrayList<SocketInfo> sockets = new ArrayList<>();
@@ -58,12 +75,25 @@ public class IPConfig {
         do {
             try {
                 String clientKey = "client" + index + ".";
-                sockets.add(new SocketInfo(config.getProperty(clientKey + "ip"),
-                        Integer.parseInt(config.getProperty(clientKey + "port"))));
+                String ip = config.getProperty(clientKey + "ip");
+                if (ip == null) {
+                    if (index == 0) {
+                        System.out.println();
+                        System.err.println(
+                                "ERROR: No ips found in config file, make sure to create and properly configure the file:"
+                                        + configFile.getPath());
+                        System.exit(1);
+                    }
+                    break;
+                }
+                int port = DEFAULT_PORT;
+                if (config.getProperty(clientKey + "port") != null) {
+                    port = Integer.parseInt(config.getProperty(clientKey + "port"));
+                }
+                sockets.add(new SocketInfo(ip, port));
                 index++;
-                // when error, there is no more sockets in config
             } catch (Exception e) {
-                break;
+                throw new IOException("Error loading sockets from config file please check if config is valid");
             }
         } while (true);
 
@@ -101,17 +131,4 @@ public class IPConfig {
         return serverSocketInfo;
     }
 
-    // public static void main(String[] args) {
-    //     System.out.println("Testing IPConfig...");
-    //     try {
-    //         System.out.println(
-    //                 "Server: " + IPConfig.getServerSocket().getIp() + ":" + IPConfig.getServerSocket().getPort());
-    //         for (int i = 0; i < IPConfig.num_sockets(); i++) {
-    //             System.out.println("Client" + i + ": " + IPConfig.getclientsocket(i).getIp() + ":"
-    //                     + IPConfig.getclientsocket(i).getPort());
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    // }
 }
